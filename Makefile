@@ -1,7 +1,10 @@
-.PHONY: migration gen build local-env dev
+.PHONY: migrate-up migrate-down gen build local-env dev
 
-migrate:
-	go run cmd/migrate/main.go
+migrate-up: build
+	bin/migrate up
+
+migrate-down: build
+	bin/migrate down
 
 gen:
 	@sqlboiler --wipe psql

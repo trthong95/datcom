@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+
+	_ "github.com/lib/pq"
 
 	"github.com/hieunmce/datcom/src/store"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -13,9 +16,25 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	_ = store
 
-	err = store.MigrateDB()
-	if err != nil {
-		fmt.Println(err)
+	flag := os.Args[1]
+	if flag != "up" && flag != "down" {
+		log.Fatalln("up down")
+	}
+
+	switch flag {
+	case "up":
+		err = store.MigrateDB()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	case "down":
+		err = store.ReverseDB()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }

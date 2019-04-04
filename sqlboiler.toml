@@ -1,5 +1,5 @@
 [psql]
-blacklist = ["goose_db_version"]
+blacklist = ["gorp_migrations"]
 dbname = "datcom"
 user = "postgres"
 pass = "datcom"

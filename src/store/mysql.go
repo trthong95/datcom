@@ -45,6 +45,13 @@ func (store *storePostgres) MigrateDB() error {
 }
 
 func (store *storePostgres) ReverseDB() error {
+	migrations := allMigrations()
+	n, err := migrate.Exec(store.db, "postgres", migrations, migrate.Down)
+	if err != nil {
+		return err
+	}
+	fmt.Println("db.migrations: reversed %d migrations", n)
+
 	return nil
 }
 
@@ -52,9 +59,10 @@ func allMigrations() *migrate.MemoryMigrationSource {
 	return &migrate.MemoryMigrationSource{
 		Migrations: []*migrate.Migration{
 			{
+				Id: "1",
 				Up: []string{`
 			CREATE TABLE users (
-				id INT PRIMARY KEY,
+				id SERIAL PRIMARY KEY,
 				name  VARCHAR NOT NULL,
 				created_at TIMESTAMPTZ NOT NULL,
 				updated_at TIMESTAMPTZ NOT NULL

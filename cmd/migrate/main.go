@@ -9,15 +9,13 @@ import (
 
 func main() {
 	connectionString := "user=postgres dbname=datcom sslmode=disable password=datcom host=localhost port=5432"
-	store, err := store.NewPostgresStore(connectionString)
+	store, err := store.NewPostgresMigrator(connectionString)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	users, err := store.GetAllUsers()
+	err = store.MigrateDB()
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	fmt.Println(users)
 }

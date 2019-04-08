@@ -61,7 +61,7 @@ func allMigrations() *migrate.MemoryMigrationSource {
 			{
 				Id: "1",
 				Up: []string{`
-			CREATE TABLE users (
+				CREATE TABLE users (
 				id SERIAL PRIMARY KEY,
 				name  VARCHAR NOT NULL,
 				created_at TIMESTAMPTZ NOT NULL,
@@ -69,6 +69,54 @@ func allMigrations() *migrate.MemoryMigrationSource {
 			)`},
 				Down: []string{`DROP TABLE users`},
 			},
+			{
+				Id: "2",
+				Up: []string{`
+				ALTER TABLE users
+				DROP COLUMN name;
+				`},
+				Down: []string{`
+				ALTER TABLE users
+				ADD COLUMN name VARCHAR NOT NULL;
+				`},
+			},
 		},
 	}
+}
+
+var myMigrations = []*migrate.Migration{
+	&migrate.Migration{
+		Id: "1",
+		Up: []string{`
+		CREATE TABLE users (
+		id SERIAL PRIMARY KEY,
+		name  VARCHAR NOT NULL,
+		created_at TIMESTAMPTZ NOT NULL,
+		updated_at TIMESTAMPTZ NOT NULL
+	)`},
+		Down: []string{`DROP TABLE users`},
+	},
+	&migrate.Migration{
+		Id: "2",
+		Up: []string{`
+		ALTER TABLE users
+		DROP COLUMN name;
+		`},
+		Down: []string{`
+		ALTER TABLE users
+		ADD COLUMN name VARCHAR NOT NULL;
+		`},
+	},
+}
+
+func (store *storePostgres) OneMigrateDB() error {
+	migrations := &migrate.MemoryMigrationSource{
+		Migrations: myMigrations[:1],
+	}
+	n, err := migrate.Exec(store.db, "postgres", migrations, migrate.Up)
+	if err != nil {
+		return err
+	}
+	fmt.Println("db.migrations: reversed %d migrations", n)
+	return nil
 }

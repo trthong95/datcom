@@ -22,20 +22,21 @@ func main() {
 	if flag != "up" && flag != "down" {
 		log.Fatalln("up down")
 	}
-	err = store.OneMigrateDB()
-	_ = err
-	// switch flag {
-	// case "up":
-	// 	err = store.MigrateDB()
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// 	}
-	// case "down":
-	// 	err = store.ReverseDB()
-	// 	if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// 	}
-	// }
+
+	switch flag {
+	case "up":
+		// err = store.MigrateDB()
+		err = store.MigrateOneDB()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	case "down":
+		// err = store.ReverseDB()
+		err = store.ReverseOneDB()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 }

@@ -25,6 +25,7 @@ import (
 type User struct {
 	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Email     string    `boil:"email" json:"email" toml:"email" yaml:"email"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -35,11 +36,13 @@ type User struct {
 var UserColumns = struct {
 	ID        string
 	Name      string
+	Email     string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
 	Name:      "name",
+	Email:     "email",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -88,11 +91,13 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 var UserWhere = struct {
 	ID        whereHelperint
 	Name      whereHelperstring
+	Email     whereHelperstring
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint{field: `id`},
 	Name:      whereHelperstring{field: `name`},
+	Email:     whereHelperstring{field: `email`},
 	CreatedAt: whereHelpertime_Time{field: `created_at`},
 	UpdatedAt: whereHelpertime_Time{field: `updated_at`},
 }
@@ -114,8 +119,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userColumns               = []string{"id", "name", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"name", "created_at", "updated_at"}
+	userColumns               = []string{"id", "name", "email", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"name", "email", "created_at", "updated_at"}
 	userColumnsWithDefault    = []string{"id"}
 	userPrimaryKeyColumns     = []string{"id"}
 )

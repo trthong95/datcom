@@ -91,6 +91,7 @@ var myMigrations = []*migrate.Migration{
 		CREATE TABLE users (
 		id SERIAL PRIMARY KEY,
 		name  VARCHAR NOT NULL,
+		email VARCHAR UNIQUE NOT NULL,
 		created_at TIMESTAMPTZ NOT NULL,
 		updated_at TIMESTAMPTZ NOT NULL
 	)`},
@@ -109,11 +110,23 @@ var myMigrations = []*migrate.Migration{
 	},
 }
 
-func (store *storePostgres) OneMigrateDB() error {
+func (store *storePostgres) MigrateOneDB() error {
 	migrations := &migrate.MemoryMigrationSource{
 		Migrations: myMigrations[:1],
 	}
 	n, err := migrate.Exec(store.db, "postgres", migrations, migrate.Up)
+	if err != nil {
+		return err
+	}
+	fmt.Println("db.migrations: Migrate %d migrations", n)
+	return nil
+}
+
+func (store *storePostgres) ReverseOneDB() error {
+	migrations := &migrate.MemoryMigrationSource{
+		Migrations: myMigrations[:1],
+	}
+	n, err := migrate.Exec(store.db, "postgres", migrations, migrate.Down)
 	if err != nil {
 		return err
 	}

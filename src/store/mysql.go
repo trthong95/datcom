@@ -92,20 +92,47 @@ var myMigrations = []*migrate.Migration{
 		id SERIAL PRIMARY KEY,
 		name  VARCHAR NOT NULL,
 		email VARCHAR UNIQUE NOT NULL,
-		created_at TIMESTAMPTZ NOT NULL,
-		updated_at TIMESTAMPTZ NOT NULL
-	)`},
-		Down: []string{`DROP TABLE users`},
-	},
-	&migrate.Migration{
-		Id: "2",
-		Up: []string{`
-		ALTER TABLE users
-		DROP COLUMN name;
-		`},
+		token VARCHAR NOT NULL
+		);
+		CREATE TABLE people_in_charge (
+			user_id INT PRIMARY KEY,
+			menu_id INT NOT NULL
+		);
+		CREATE TABLE menus (
+			id SERIAL PRIMARY KEY,
+			owner_id INT,
+			menu_name VARCHAR,
+			created_at TIMESTAMPTZ NOT NULL,
+			deadline TIMESTAMPTZ NOT NULL,
+			payment_reminder TIMESTAMPTZ NOT NULL,
+			status INT
+		);
+		CREATE TABLE items (
+			id SERIAL PRIMARY KEY,
+			item_name VARCHAR,
+			menu_id INT
+		);
+		CREATE TABLE orders (
+			id SERIAL PRIMARY KEY,
+			user_id INT,
+			item_id INT,
+			created_at TIMESTAMPTZ,
+			updated_at TIMESTAMPTZ
+		);
+		ALTER TABLE people_in_charge ADD FOREIGN KEY (user_id) REFERENCES users(id);
+		ALTER TABLE people_in_charge ADD FOREIGN KEY (menu_id) REFERENCES menus(id);
+		ALTER TABLE menus ADD FOREIGN KEY (owner_id) REFERENCES users(id);
+		ALTER TABLE items ADD FOREIGN KEY (menu_id) REFERENCES menus(id);
+		ALTER TABLE orders ADD FOREIGN KEY (item_id) REFERENCES items(id);
+		ALTER TABLE orders ADD FOREIGN KEY (user_id) REFERENCES users(id);
+
+	`},
 		Down: []string{`
-		ALTER TABLE users
-		ADD COLUMN name VARCHAR NOT NULL;
+		DROP TABLE people_in_charge;
+		DROP TABLE orders;
+		DROP TABLE items;
+		DROP TABLE menus;
+		DROP TABLE users;
 		`},
 	},
 }

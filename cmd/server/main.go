@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/hieunmce/datcom/src/store"
 	_ "github.com/lib/pq"
+	"github.com/trthong95/datcom/src/store"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 
-	"github.com/hieunmce/datcom/models"
+	"github.com/trthong95/datcom/models"
 	"github.com/volatiletech/sqlboiler/boil"
 )
 

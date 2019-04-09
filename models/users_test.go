@@ -494,6 +494,446 @@ func testUsersInsertWhitelist(t *testing.T) {
 	}
 }
 
+func testUserOneToOnePeopleInChargeUsingPeopleInCharge(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var foreign PeopleInCharge
+	var local User
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &foreign, peopleInChargeDBTypes, true, peopleInChargeColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize PeopleInCharge struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &local, userDBTypes, true, userColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize User struct: %s", err)
+	}
+
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreign.UserID = local.ID
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.PeopleInCharge().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if check.UserID != foreign.UserID {
+		t.Errorf("want: %v, got %v", foreign.UserID, check.UserID)
+	}
+
+	slice := UserSlice{&local}
+	if err = local.L.LoadPeopleInCharge(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.PeopleInCharge == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.PeopleInCharge = nil
+	if err = local.L.LoadPeopleInCharge(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.PeopleInCharge == nil {
+		t.Error("struct should have been eager loaded")
+	}
+}
+
+func testUserOneToOneSetOpPeopleInChargeUsingPeopleInCharge(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b, c PeopleInCharge
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, peopleInChargeDBTypes, false, strmangle.SetComplement(peopleInChargePrimaryKeyColumns, peopleInChargeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, peopleInChargeDBTypes, false, strmangle.SetComplement(peopleInChargePrimaryKeyColumns, peopleInChargeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*PeopleInCharge{&b, &c} {
+		err = a.SetPeopleInCharge(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.PeopleInCharge != x {
+			t.Error("relationship struct not set to correct value")
+		}
+		if x.R.User != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+
+		if a.ID != x.UserID {
+			t.Error("foreign key was wrong value", a.ID)
+		}
+
+		if exists, err := PeopleInChargeExists(ctx, tx, x.UserID); err != nil {
+			t.Fatal(err)
+		} else if !exists {
+			t.Error("want 'x' to exist")
+		}
+
+		if a.ID != x.UserID {
+			t.Error("foreign key was wrong value", a.ID, x.UserID)
+		}
+
+		if _, err = x.Delete(ctx, tx); err != nil {
+			t.Fatal("failed to delete x", err)
+		}
+	}
+}
+
+func testUserToManyOwnerMenus(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b, c Menu
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, true, userColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize User struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, menuDBTypes, false, menuColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, menuDBTypes, false, menuColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&b.OwnerID, a.ID)
+	queries.Assign(&c.OwnerID, a.ID)
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.OwnerMenus().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if queries.Equal(v.OwnerID, b.OwnerID) {
+			bFound = true
+		}
+		if queries.Equal(v.OwnerID, c.OwnerID) {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := UserSlice{&a}
+	if err = a.L.LoadOwnerMenus(ctx, tx, false, (*[]*User)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.OwnerMenus); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.OwnerMenus = nil
+	if err = a.L.LoadOwnerMenus(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.OwnerMenus); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testUserToManyAddOpOwnerMenus(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b, c, d, e Menu
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Menu{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, menuDBTypes, false, strmangle.SetComplement(menuPrimaryKeyColumns, menuColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*Menu{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddOwnerMenus(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if !queries.Equal(a.ID, first.OwnerID) {
+			t.Error("foreign key was wrong value", a.ID, first.OwnerID)
+		}
+		if !queries.Equal(a.ID, second.OwnerID) {
+			t.Error("foreign key was wrong value", a.ID, second.OwnerID)
+		}
+
+		if first.R.Owner != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Owner != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.OwnerMenus[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.OwnerMenus[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.OwnerMenus().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
+
+func testUserToManySetOpOwnerMenus(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b, c, d, e Menu
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Menu{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, menuDBTypes, false, strmangle.SetComplement(menuPrimaryKeyColumns, menuColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.SetOwnerMenus(ctx, tx, false, &b, &c)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.OwnerMenus().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.SetOwnerMenus(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.OwnerMenus().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.OwnerID) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.OwnerID) {
+		t.Error("want c's foreign key value to be nil")
+	}
+	if !queries.Equal(a.ID, d.OwnerID) {
+		t.Error("foreign key was wrong value", a.ID, d.OwnerID)
+	}
+	if !queries.Equal(a.ID, e.OwnerID) {
+		t.Error("foreign key was wrong value", a.ID, e.OwnerID)
+	}
+
+	if b.R.Owner != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.Owner != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.Owner != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.Owner != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if a.R.OwnerMenus[0] != &d {
+		t.Error("relationship struct slice not set to correct value")
+	}
+	if a.R.OwnerMenus[1] != &e {
+		t.Error("relationship struct slice not set to correct value")
+	}
+}
+
+func testUserToManyRemoveOpOwnerMenus(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a User
+	var b, c, d, e Menu
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, userDBTypes, false, strmangle.SetComplement(userPrimaryKeyColumns, userColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*Menu{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, menuDBTypes, false, strmangle.SetComplement(menuPrimaryKeyColumns, menuColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	err = a.AddOwnerMenus(ctx, tx, true, foreigners...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err := a.OwnerMenus().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 4 {
+		t.Error("count was wrong:", count)
+	}
+
+	err = a.RemoveOwnerMenus(ctx, tx, foreigners[:2]...)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.OwnerMenus().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.OwnerID) {
+		t.Error("want b's foreign key value to be nil")
+	}
+	if !queries.IsValuerNil(c.OwnerID) {
+		t.Error("want c's foreign key value to be nil")
+	}
+
+	if b.R.Owner != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.Owner != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.Owner != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+	if e.R.Owner != &a {
+		t.Error("relationship to a should have been preserved")
+	}
+
+	if len(a.R.OwnerMenus) != 2 {
+		t.Error("should have preserved two relationships")
+	}
+
+	// Removal doesn't do a stable deletion for performance so we have to flip the order
+	if a.R.OwnerMenus[1] != &d {
+		t.Error("relationship to d should have been preserved")
+	}
+	if a.R.OwnerMenus[0] != &e {
+		t.Error("relationship to e should have been preserved")
+	}
+}
+
 func testUsersReload(t *testing.T) {
 	t.Parallel()
 
@@ -568,7 +1008,7 @@ func testUsersSelect(t *testing.T) {
 }
 
 var (
-	userDBTypes = map[string]string{`ID`: `integer`, `Name`: `character varying`, `Email`: `character varying`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
+	userDBTypes = map[string]string{`ID`: `integer`, `Name`: `character varying`, `Email`: `character varying`, `Token`: `character varying`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
 	_           = bytes.MinRead
 )
 

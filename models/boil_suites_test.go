@@ -12,77 +12,150 @@ import "testing"
 // It does NOT run each operation group in parallel.
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
+	t.Run("Items", testItems)
+	t.Run("Menus", testMenus)
+	t.Run("Orders", testOrders)
+	t.Run("PeopleInCharges", testPeopleInCharges)
 	t.Run("Users", testUsers)
 }
 
 func TestDelete(t *testing.T) {
+	t.Run("Items", testItemsDelete)
+	t.Run("Menus", testMenusDelete)
+	t.Run("Orders", testOrdersDelete)
+	t.Run("PeopleInCharges", testPeopleInChargesDelete)
 	t.Run("Users", testUsersDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
+	t.Run("Items", testItemsQueryDeleteAll)
+	t.Run("Menus", testMenusQueryDeleteAll)
+	t.Run("Orders", testOrdersQueryDeleteAll)
+	t.Run("PeopleInCharges", testPeopleInChargesQueryDeleteAll)
 	t.Run("Users", testUsersQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
+	t.Run("Items", testItemsSliceDeleteAll)
+	t.Run("Menus", testMenusSliceDeleteAll)
+	t.Run("Orders", testOrdersSliceDeleteAll)
+	t.Run("PeopleInCharges", testPeopleInChargesSliceDeleteAll)
 	t.Run("Users", testUsersSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
+	t.Run("Items", testItemsExists)
+	t.Run("Menus", testMenusExists)
+	t.Run("Orders", testOrdersExists)
+	t.Run("PeopleInCharges", testPeopleInChargesExists)
 	t.Run("Users", testUsersExists)
 }
 
 func TestFind(t *testing.T) {
+	t.Run("Items", testItemsFind)
+	t.Run("Menus", testMenusFind)
+	t.Run("Orders", testOrdersFind)
+	t.Run("PeopleInCharges", testPeopleInChargesFind)
 	t.Run("Users", testUsersFind)
 }
 
 func TestBind(t *testing.T) {
+	t.Run("Items", testItemsBind)
+	t.Run("Menus", testMenusBind)
+	t.Run("Orders", testOrdersBind)
+	t.Run("PeopleInCharges", testPeopleInChargesBind)
 	t.Run("Users", testUsersBind)
 }
 
 func TestOne(t *testing.T) {
+	t.Run("Items", testItemsOne)
+	t.Run("Menus", testMenusOne)
+	t.Run("Orders", testOrdersOne)
+	t.Run("PeopleInCharges", testPeopleInChargesOne)
 	t.Run("Users", testUsersOne)
 }
 
 func TestAll(t *testing.T) {
+	t.Run("Items", testItemsAll)
+	t.Run("Menus", testMenusAll)
+	t.Run("Orders", testOrdersAll)
+	t.Run("PeopleInCharges", testPeopleInChargesAll)
 	t.Run("Users", testUsersAll)
 }
 
 func TestCount(t *testing.T) {
+	t.Run("Items", testItemsCount)
+	t.Run("Menus", testMenusCount)
+	t.Run("Orders", testOrdersCount)
+	t.Run("PeopleInCharges", testPeopleInChargesCount)
 	t.Run("Users", testUsersCount)
 }
 
 func TestHooks(t *testing.T) {
+	t.Run("Items", testItemsHooks)
+	t.Run("Menus", testMenusHooks)
+	t.Run("Orders", testOrdersHooks)
+	t.Run("PeopleInCharges", testPeopleInChargesHooks)
 	t.Run("Users", testUsersHooks)
 }
 
 func TestInsert(t *testing.T) {
+	t.Run("Items", testItemsInsert)
+	t.Run("Items", testItemsInsertWhitelist)
+	t.Run("Menus", testMenusInsert)
+	t.Run("Menus", testMenusInsertWhitelist)
+	t.Run("Orders", testOrdersInsert)
+	t.Run("Orders", testOrdersInsertWhitelist)
+	t.Run("PeopleInCharges", testPeopleInChargesInsert)
+	t.Run("PeopleInCharges", testPeopleInChargesInsertWhitelist)
 	t.Run("Users", testUsersInsert)
 	t.Run("Users", testUsersInsertWhitelist)
 }
 
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOne(t *testing.T) {}
+func TestToOne(t *testing.T) {
+	t.Run("ItemToMenuUsingMenu", testItemToOneMenuUsingMenu)
+	t.Run("MenuToUserUsingOwner", testMenuToOneUserUsingOwner)
+	t.Run("PeopleInChargeToUserUsingUser", testPeopleInChargeToOneUserUsingUser)
+	t.Run("PeopleInChargeToMenuUsingMenu", testPeopleInChargeToOneMenuUsingMenu)
+}
 
 // TestOneToOne tests cannot be run in parallel
 // or deadlocks can occur.
-func TestOneToOne(t *testing.T) {}
+func TestOneToOne(t *testing.T) {
+	t.Run("UserToPeopleInChargeUsingPeopleInCharge", testUserOneToOnePeopleInChargeUsingPeopleInCharge)
+}
 
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToMany(t *testing.T) {}
+func TestToMany(t *testing.T) {
+	t.Run("MenuToItems", testMenuToManyItems)
+	t.Run("MenuToPeopleInCharges", testMenuToManyPeopleInCharges)
+	t.Run("UserToOwnerMenus", testUserToManyOwnerMenus)
+}
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOneSet(t *testing.T) {}
+func TestToOneSet(t *testing.T) {
+	t.Run("ItemToMenuUsingItems", testItemToOneSetOpMenuUsingMenu)
+	t.Run("MenuToUserUsingOwnerMenus", testMenuToOneSetOpUserUsingOwner)
+	t.Run("PeopleInChargeToUserUsingPeopleInCharge", testPeopleInChargeToOneSetOpUserUsingUser)
+	t.Run("PeopleInChargeToMenuUsingPeopleInCharges", testPeopleInChargeToOneSetOpMenuUsingMenu)
+}
 
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOneRemove(t *testing.T) {}
+func TestToOneRemove(t *testing.T) {
+	t.Run("ItemToMenuUsingItems", testItemToOneRemoveOpMenuUsingMenu)
+	t.Run("MenuToUserUsingOwnerMenus", testMenuToOneRemoveOpUserUsingOwner)
+}
 
 // TestOneToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestOneToOneSet(t *testing.T) {}
+func TestOneToOneSet(t *testing.T) {
+	t.Run("UserToPeopleInChargeUsingPeopleInCharge", testUserOneToOneSetOpPeopleInChargeUsingPeopleInCharge)
+}
 
 // TestOneToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
@@ -90,32 +163,62 @@ func TestOneToOneRemove(t *testing.T) {}
 
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManyAdd(t *testing.T) {}
+func TestToManyAdd(t *testing.T) {
+	t.Run("MenuToItems", testMenuToManyAddOpItems)
+	t.Run("MenuToPeopleInCharges", testMenuToManyAddOpPeopleInCharges)
+	t.Run("UserToOwnerMenus", testUserToManyAddOpOwnerMenus)
+}
 
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManySet(t *testing.T) {}
+func TestToManySet(t *testing.T) {
+	t.Run("MenuToItems", testMenuToManySetOpItems)
+	t.Run("UserToOwnerMenus", testUserToManySetOpOwnerMenus)
+}
 
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManyRemove(t *testing.T) {}
+func TestToManyRemove(t *testing.T) {
+	t.Run("MenuToItems", testMenuToManyRemoveOpItems)
+	t.Run("UserToOwnerMenus", testUserToManyRemoveOpOwnerMenus)
+}
 
 func TestReload(t *testing.T) {
+	t.Run("Items", testItemsReload)
+	t.Run("Menus", testMenusReload)
+	t.Run("Orders", testOrdersReload)
+	t.Run("PeopleInCharges", testPeopleInChargesReload)
 	t.Run("Users", testUsersReload)
 }
 
 func TestReloadAll(t *testing.T) {
+	t.Run("Items", testItemsReloadAll)
+	t.Run("Menus", testMenusReloadAll)
+	t.Run("Orders", testOrdersReloadAll)
+	t.Run("PeopleInCharges", testPeopleInChargesReloadAll)
 	t.Run("Users", testUsersReloadAll)
 }
 
 func TestSelect(t *testing.T) {
+	t.Run("Items", testItemsSelect)
+	t.Run("Menus", testMenusSelect)
+	t.Run("Orders", testOrdersSelect)
+	t.Run("PeopleInCharges", testPeopleInChargesSelect)
 	t.Run("Users", testUsersSelect)
 }
 
 func TestUpdate(t *testing.T) {
+	t.Run("Items", testItemsUpdate)
+	t.Run("Menus", testMenusUpdate)
+	t.Run("Orders", testOrdersUpdate)
+	t.Run("PeopleInCharges", testPeopleInChargesUpdate)
 	t.Run("Users", testUsersUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
+	t.Run("Items", testItemsSliceUpdateAll)
+	t.Run("Menus", testMenusSliceUpdateAll)
+	t.Run("Orders", testOrdersSliceUpdateAll)
+	t.Run("PeopleInCharges", testPeopleInChargesSliceUpdateAll)
 	t.Run("Users", testUsersSliceUpdateAll)
 }

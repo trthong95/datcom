@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/hieunmce/datcom/src/store"
+	"github.com/trthong95/datcom/src/store"
 )
 
 func main() {

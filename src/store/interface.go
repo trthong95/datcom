@@ -1,6 +1,6 @@
 package store
 
-import "github.com/hieunmce/datcom/models"
+import "github.com/trthong95/datcom/models"
 
 type Migrator interface {
 	MigrateDB() error

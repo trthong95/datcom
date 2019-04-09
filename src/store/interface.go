@@ -9,4 +9,5 @@ type Migrator interface {
 
 type Store interface {
 	GetAllUsers() ([]*models.User, error)
+	CreateUser(p *PersonInfo) error
 }

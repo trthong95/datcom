@@ -519,8 +519,9 @@ func testItemToManyOrders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.ItemID, a.ID)
-	queries.Assign(&c.ItemID, a.ID)
+	b.ItemID = a.ID
+	c.ItemID = a.ID
+
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -535,10 +536,10 @@ func testItemToManyOrders(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.ItemID, b.ItemID) {
+		if v.ItemID == b.ItemID {
 			bFound = true
 		}
-		if queries.Equal(v.ItemID, c.ItemID) {
+		if v.ItemID == c.ItemID {
 			cFound = true
 		}
 	}
@@ -616,10 +617,10 @@ func testItemToManyAddOpOrders(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.ItemID) {
+		if a.ID != first.ItemID {
 			t.Error("foreign key was wrong value", a.ID, first.ItemID)
 		}
-		if !queries.Equal(a.ID, second.ItemID) {
+		if a.ID != second.ItemID {
 			t.Error("foreign key was wrong value", a.ID, second.ItemID)
 		}
 
@@ -646,182 +647,6 @@ func testItemToManyAddOpOrders(t *testing.T) {
 		}
 	}
 }
-
-func testItemToManySetOpOrders(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Item
-	var b, c, d, e Order
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, itemDBTypes, false, strmangle.SetComplement(itemPrimaryKeyColumns, itemColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Order{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, orderDBTypes, false, strmangle.SetComplement(orderPrimaryKeyColumns, orderColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetOrders(ctx, tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Orders().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetOrders(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Orders().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.ItemID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.ItemID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if !queries.Equal(a.ID, d.ItemID) {
-		t.Error("foreign key was wrong value", a.ID, d.ItemID)
-	}
-	if !queries.Equal(a.ID, e.ItemID) {
-		t.Error("foreign key was wrong value", a.ID, e.ItemID)
-	}
-
-	if b.R.Item != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Item != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Item != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.Item != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.Orders[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.Orders[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testItemToManyRemoveOpOrders(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Item
-	var b, c, d, e Order
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, itemDBTypes, false, strmangle.SetComplement(itemPrimaryKeyColumns, itemColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Order{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, orderDBTypes, false, strmangle.SetComplement(orderPrimaryKeyColumns, orderColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddOrders(ctx, tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Orders().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveOrders(ctx, tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Orders().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if !queries.IsValuerNil(b.ItemID) {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if !queries.IsValuerNil(c.ItemID) {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.Item != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Item != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Item != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.Item != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.Orders) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Orders[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.Orders[0] != &e {
-		t.Error("relationship to e should have been preserved")
-	}
-}
-
 func testItemToOneMenuUsingMenu(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
@@ -831,7 +656,7 @@ func testItemToOneMenuUsingMenu(t *testing.T) {
 	var foreign Menu
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, itemDBTypes, true, itemColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, itemDBTypes, false, itemColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Item struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, menuDBTypes, false, menuColumnsWithDefault...); err != nil {
@@ -842,7 +667,7 @@ func testItemToOneMenuUsingMenu(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&local.MenuID, foreign.ID)
+	local.MenuID = foreign.ID
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -852,7 +677,7 @@ func testItemToOneMenuUsingMenu(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !queries.Equal(check.ID, foreign.ID) {
+	if check.ID != foreign.ID {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
@@ -914,7 +739,7 @@ func testItemToOneSetOpMenuUsingMenu(t *testing.T) {
 		if x.R.Items[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if !queries.Equal(a.MenuID, x.ID) {
+		if a.MenuID != x.ID {
 			t.Error("foreign key was wrong value", a.MenuID)
 		}
 
@@ -925,60 +750,9 @@ func testItemToOneSetOpMenuUsingMenu(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if !queries.Equal(a.MenuID, x.ID) {
+		if a.MenuID != x.ID {
 			t.Error("foreign key was wrong value", a.MenuID, x.ID)
 		}
-	}
-}
-
-func testItemToOneRemoveOpMenuUsingMenu(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Item
-	var b Menu
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, itemDBTypes, false, strmangle.SetComplement(itemPrimaryKeyColumns, itemColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, menuDBTypes, false, strmangle.SetComplement(menuPrimaryKeyColumns, menuColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetMenu(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveMenu(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.Menu().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.Menu != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.MenuID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.Items) != 0 {
-		t.Error("failed to remove a from b's relationships")
 	}
 }
 

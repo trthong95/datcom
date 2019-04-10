@@ -25,7 +25,7 @@ import (
 // Menu is an object representing the database table.
 type Menu struct {
 	ID              int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	OwnerID         null.Int    `boil:"owner_id" json:"owner_id,omitempty" toml:"owner_id" yaml:"owner_id,omitempty"`
+	OwnerID         int         `boil:"owner_id" json:"owner_id" toml:"owner_id" yaml:"owner_id"`
 	MenuName        null.String `boil:"menu_name" json:"menu_name,omitempty" toml:"menu_name" yaml:"menu_name,omitempty"`
 	CreatedAt       time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	Deadline        time.Time   `boil:"deadline" json:"deadline" toml:"deadline" yaml:"deadline"`
@@ -56,6 +56,29 @@ var MenuColumns = struct {
 
 // Generated where
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 type whereHelpertime_Time struct{ field string }
 
 func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
@@ -77,9 +100,32 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_Int struct{ field string }
+
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MenuWhere = struct {
 	ID              whereHelperint
-	OwnerID         whereHelpernull_Int
+	OwnerID         whereHelperint
 	MenuName        whereHelpernull_String
 	CreatedAt       whereHelpertime_Time
 	Deadline        whereHelpertime_Time
@@ -87,7 +133,7 @@ var MenuWhere = struct {
 	Status          whereHelpernull_Int
 }{
 	ID:              whereHelperint{field: `id`},
-	OwnerID:         whereHelpernull_Int{field: `owner_id`},
+	OwnerID:         whereHelperint{field: `owner_id`},
 	MenuName:        whereHelpernull_String{field: `menu_name`},
 	CreatedAt:       whereHelpertime_Time{field: `created_at`},
 	Deadline:        whereHelpertime_Time{field: `deadline`},
@@ -476,9 +522,7 @@ func (menuL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 		if object.R == nil {
 			object.R = &menuR{}
 		}
-		if !queries.IsNil(object.OwnerID) {
-			args = append(args, object.OwnerID)
-		}
+		args = append(args, object.OwnerID)
 
 	} else {
 	Outer:
@@ -488,14 +532,12 @@ func (menuL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.OwnerID) {
+				if a == obj.OwnerID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.OwnerID) {
-				args = append(args, obj.OwnerID)
-			}
+			args = append(args, obj.OwnerID)
 
 		}
 	}
@@ -550,7 +592,7 @@ func (menuL) LoadOwner(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.OwnerID, foreign.ID) {
+			if local.OwnerID == foreign.ID {
 				local.R.Owner = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
@@ -590,7 +632,7 @@ func (menuL) LoadItems(ctx context.Context, e boil.ContextExecutor, singular boo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -645,7 +687,7 @@ func (menuL) LoadItems(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.MenuID) {
+			if local.ID == foreign.MenuID {
 				local.R.Items = append(local.R.Items, foreign)
 				if foreign.R == nil {
 					foreign.R = &itemR{}
@@ -781,7 +823,7 @@ func (o *Menu) SetOwner(ctx context.Context, exec boil.ContextExecutor, insert b
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.OwnerID, related.ID)
+	o.OwnerID = related.ID
 	if o.R == nil {
 		o.R = &menuR{
 			Owner: related,
@@ -801,37 +843,6 @@ func (o *Menu) SetOwner(ctx context.Context, exec boil.ContextExecutor, insert b
 	return nil
 }
 
-// RemoveOwner relationship.
-// Sets o.R.Owner to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Menu) RemoveOwner(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.OwnerID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("owner_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.R.Owner = nil
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.OwnerMenus {
-		if queries.Equal(o.OwnerID, ri.OwnerID) {
-			continue
-		}
-
-		ln := len(related.R.OwnerMenus)
-		if ln > 1 && i < ln-1 {
-			related.R.OwnerMenus[i] = related.R.OwnerMenus[ln-1]
-		}
-		related.R.OwnerMenus = related.R.OwnerMenus[:ln-1]
-		break
-	}
-	return nil
-}
-
 // AddItems adds the given related objects to the existing relationships
 // of the menu, optionally inserting them as new records.
 // Appends related to o.R.Items.
@@ -840,7 +851,7 @@ func (o *Menu) AddItems(ctx context.Context, exec boil.ContextExecutor, insert b
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.MenuID, o.ID)
+			rel.MenuID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -861,7 +872,7 @@ func (o *Menu) AddItems(ctx context.Context, exec boil.ContextExecutor, insert b
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.MenuID, o.ID)
+			rel.MenuID = o.ID
 		}
 	}
 
@@ -882,76 +893,6 @@ func (o *Menu) AddItems(ctx context.Context, exec boil.ContextExecutor, insert b
 			rel.R.Menu = o
 		}
 	}
-	return nil
-}
-
-// SetItems removes all previously related items of the
-// menu replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Menu's Items accordingly.
-// Replaces o.R.Items with related.
-// Sets related.R.Menu's Items accordingly.
-func (o *Menu) SetItems(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Item) error {
-	query := "update \"items\" set \"menu_id\" = null where \"menu_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Items {
-			queries.SetScanner(&rel.MenuID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Menu = nil
-		}
-
-		o.R.Items = nil
-	}
-	return o.AddItems(ctx, exec, insert, related...)
-}
-
-// RemoveItems relationships from objects passed in.
-// Removes related items from R.Items (uses pointer comparison, removal does not keep order)
-// Sets related.R.Menu.
-func (o *Menu) RemoveItems(ctx context.Context, exec boil.ContextExecutor, related ...*Item) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.MenuID, nil)
-		if rel.R != nil {
-			rel.R.Menu = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("menu_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Items {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Items)
-			if ln > 1 && i < ln-1 {
-				o.R.Items[i] = o.R.Items[ln-1]
-			}
-			o.R.Items = o.R.Items[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

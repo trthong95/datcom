@@ -46,15 +46,6 @@ var UserColumns = struct {
 
 // Generated where
 
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var UserWhere = struct {
 	ID    whereHelperint
 	Name  whereHelperstring
@@ -555,7 +546,7 @@ func (userL) LoadOwnerMenus(ctx context.Context, e boil.ContextExecutor, singula
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -610,7 +601,7 @@ func (userL) LoadOwnerMenus(ctx context.Context, e boil.ContextExecutor, singula
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.OwnerID) {
+			if local.ID == foreign.OwnerID {
 				local.R.OwnerMenus = append(local.R.OwnerMenus, foreign)
 				if foreign.R == nil {
 					foreign.R = &menuR{}
@@ -650,7 +641,7 @@ func (userL) LoadOrders(ctx context.Context, e boil.ContextExecutor, singular bo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -705,7 +696,7 @@ func (userL) LoadOrders(ctx context.Context, e boil.ContextExecutor, singular bo
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.UserID) {
+			if local.ID == foreign.UserID {
 				local.R.Orders = append(local.R.Orders, foreign)
 				if foreign.R == nil {
 					foreign.R = &orderR{}
@@ -778,7 +769,7 @@ func (o *User) AddOwnerMenus(ctx context.Context, exec boil.ContextExecutor, ins
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.OwnerID, o.ID)
+			rel.OwnerID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -799,7 +790,7 @@ func (o *User) AddOwnerMenus(ctx context.Context, exec boil.ContextExecutor, ins
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.OwnerID, o.ID)
+			rel.OwnerID = o.ID
 		}
 	}
 
@@ -823,76 +814,6 @@ func (o *User) AddOwnerMenus(ctx context.Context, exec boil.ContextExecutor, ins
 	return nil
 }
 
-// SetOwnerMenus removes all previously related items of the
-// user replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Owner's OwnerMenus accordingly.
-// Replaces o.R.OwnerMenus with related.
-// Sets related.R.Owner's OwnerMenus accordingly.
-func (o *User) SetOwnerMenus(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Menu) error {
-	query := "update \"menus\" set \"owner_id\" = null where \"owner_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.OwnerMenus {
-			queries.SetScanner(&rel.OwnerID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Owner = nil
-		}
-
-		o.R.OwnerMenus = nil
-	}
-	return o.AddOwnerMenus(ctx, exec, insert, related...)
-}
-
-// RemoveOwnerMenus relationships from objects passed in.
-// Removes related items from R.OwnerMenus (uses pointer comparison, removal does not keep order)
-// Sets related.R.Owner.
-func (o *User) RemoveOwnerMenus(ctx context.Context, exec boil.ContextExecutor, related ...*Menu) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.OwnerID, nil)
-		if rel.R != nil {
-			rel.R.Owner = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("owner_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.OwnerMenus {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.OwnerMenus)
-			if ln > 1 && i < ln-1 {
-				o.R.OwnerMenus[i] = o.R.OwnerMenus[ln-1]
-			}
-			o.R.OwnerMenus = o.R.OwnerMenus[:ln-1]
-			break
-		}
-	}
-
-	return nil
-}
-
 // AddOrders adds the given related objects to the existing relationships
 // of the user, optionally inserting them as new records.
 // Appends related to o.R.Orders.
@@ -901,7 +822,7 @@ func (o *User) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert 
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.UserID, o.ID)
+			rel.UserID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -922,7 +843,7 @@ func (o *User) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert 
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.UserID, o.ID)
+			rel.UserID = o.ID
 		}
 	}
 
@@ -943,76 +864,6 @@ func (o *User) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert 
 			rel.R.User = o
 		}
 	}
-	return nil
-}
-
-// SetOrders removes all previously related items of the
-// user replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.User's Orders accordingly.
-// Replaces o.R.Orders with related.
-// Sets related.R.User's Orders accordingly.
-func (o *User) SetOrders(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Order) error {
-	query := "update \"orders\" set \"user_id\" = null where \"user_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Orders {
-			queries.SetScanner(&rel.UserID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.User = nil
-		}
-
-		o.R.Orders = nil
-	}
-	return o.AddOrders(ctx, exec, insert, related...)
-}
-
-// RemoveOrders relationships from objects passed in.
-// Removes related items from R.Orders (uses pointer comparison, removal does not keep order)
-// Sets related.R.User.
-func (o *User) RemoveOrders(ctx context.Context, exec boil.ContextExecutor, related ...*Order) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.UserID, nil)
-		if rel.R != nil {
-			rel.R.User = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Orders {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Orders)
-			if ln > 1 && i < ln-1 {
-				o.R.Orders[i] = o.R.Orders[ln-1]
-			}
-			o.R.Orders = o.R.Orders[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

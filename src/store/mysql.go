@@ -73,7 +73,7 @@ var allMigrations = []*migrate.Migration{
 		);
 		CREATE TABLE menus (
 			id SERIAL PRIMARY KEY,
-			owner_id INT,
+			owner_id INT NOT NULL,
 			menu_name VARCHAR,
 			created_at TIMESTAMPTZ NOT NULL,
 			deadline TIMESTAMPTZ NOT NULL,
@@ -82,15 +82,15 @@ var allMigrations = []*migrate.Migration{
 		);
 		CREATE TABLE items (
 			id SERIAL PRIMARY KEY,
-			item_name VARCHAR,
-			menu_id INT
+			item_name VARCHAR NOT NULL,
+			menu_id INT NOT NULL
 		);
 		CREATE TABLE orders (
 			id SERIAL PRIMARY KEY,
-			user_id INT,
-			item_id INT,
-			created_at TIMESTAMPTZ,
-			updated_at TIMESTAMPTZ
+			user_id INT NOT NULL,
+			item_id INT NOT NULL,
+			created_at TIMESTAMPTZ NOT NULL,
+			updated_at TIMESTAMPTZ NOT NULL
 		);
 		ALTER TABLE people_in_charge ADD FOREIGN KEY (user_id) REFERENCES users(id);
 		ALTER TABLE people_in_charge ADD FOREIGN KEY (menu_id) REFERENCES menus(id);

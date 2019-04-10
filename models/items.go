@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -24,9 +23,9 @@ import (
 
 // Item is an object representing the database table.
 type Item struct {
-	ID       int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ItemName null.String `boil:"item_name" json:"item_name,omitempty" toml:"item_name" yaml:"item_name,omitempty"`
-	MenuID   null.Int    `boil:"menu_id" json:"menu_id,omitempty" toml:"menu_id" yaml:"menu_id,omitempty"`
+	ID       int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ItemName string `boil:"item_name" json:"item_name" toml:"item_name" yaml:"item_name"`
+	MenuID   int    `boil:"menu_id" json:"menu_id" toml:"menu_id" yaml:"menu_id"`
 
 	R *itemR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L itemL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -53,60 +52,23 @@ func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, 
 func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelpernull_String struct{ field string }
+type whereHelperstring struct{ field string }
 
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelpernull_Int struct{ field string }
-
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var ItemWhere = struct {
 	ID       whereHelperint
-	ItemName whereHelpernull_String
-	MenuID   whereHelpernull_Int
+	ItemName whereHelperstring
+	MenuID   whereHelperint
 }{
 	ID:       whereHelperint{field: `id`},
-	ItemName: whereHelpernull_String{field: `item_name`},
-	MenuID:   whereHelpernull_Int{field: `menu_id`},
+	ItemName: whereHelperstring{field: `item_name`},
+	MenuID:   whereHelperint{field: `menu_id`},
 }
 
 // ItemRels is where relationship names are stored.
@@ -466,9 +428,7 @@ func (itemL) LoadMenu(ctx context.Context, e boil.ContextExecutor, singular bool
 		if object.R == nil {
 			object.R = &itemR{}
 		}
-		if !queries.IsNil(object.MenuID) {
-			args = append(args, object.MenuID)
-		}
+		args = append(args, object.MenuID)
 
 	} else {
 	Outer:
@@ -478,14 +438,12 @@ func (itemL) LoadMenu(ctx context.Context, e boil.ContextExecutor, singular bool
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.MenuID) {
+				if a == obj.MenuID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.MenuID) {
-				args = append(args, obj.MenuID)
-			}
+			args = append(args, obj.MenuID)
 
 		}
 	}
@@ -540,7 +498,7 @@ func (itemL) LoadMenu(ctx context.Context, e boil.ContextExecutor, singular bool
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.MenuID, foreign.ID) {
+			if local.MenuID == foreign.ID {
 				local.R.Menu = foreign
 				if foreign.R == nil {
 					foreign.R = &menuR{}
@@ -580,7 +538,7 @@ func (itemL) LoadOrders(ctx context.Context, e boil.ContextExecutor, singular bo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ID) {
+				if a == obj.ID {
 					continue Outer
 				}
 			}
@@ -635,7 +593,7 @@ func (itemL) LoadOrders(ctx context.Context, e boil.ContextExecutor, singular bo
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.ItemID) {
+			if local.ID == foreign.ItemID {
 				local.R.Orders = append(local.R.Orders, foreign)
 				if foreign.R == nil {
 					foreign.R = &orderR{}
@@ -676,7 +634,7 @@ func (o *Item) SetMenu(ctx context.Context, exec boil.ContextExecutor, insert bo
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.MenuID, related.ID)
+	o.MenuID = related.ID
 	if o.R == nil {
 		o.R = &itemR{
 			Menu: related,
@@ -696,37 +654,6 @@ func (o *Item) SetMenu(ctx context.Context, exec boil.ContextExecutor, insert bo
 	return nil
 }
 
-// RemoveMenu relationship.
-// Sets o.R.Menu to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Item) RemoveMenu(ctx context.Context, exec boil.ContextExecutor, related *Menu) error {
-	var err error
-
-	queries.SetScanner(&o.MenuID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("menu_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.R.Menu = nil
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Items {
-		if queries.Equal(o.MenuID, ri.MenuID) {
-			continue
-		}
-
-		ln := len(related.R.Items)
-		if ln > 1 && i < ln-1 {
-			related.R.Items[i] = related.R.Items[ln-1]
-		}
-		related.R.Items = related.R.Items[:ln-1]
-		break
-	}
-	return nil
-}
-
 // AddOrders adds the given related objects to the existing relationships
 // of the item, optionally inserting them as new records.
 // Appends related to o.R.Orders.
@@ -735,7 +662,7 @@ func (o *Item) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert 
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.ItemID, o.ID)
+			rel.ItemID = o.ID
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -756,7 +683,7 @@ func (o *Item) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert 
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.ItemID, o.ID)
+			rel.ItemID = o.ID
 		}
 	}
 
@@ -777,76 +704,6 @@ func (o *Item) AddOrders(ctx context.Context, exec boil.ContextExecutor, insert 
 			rel.R.Item = o
 		}
 	}
-	return nil
-}
-
-// SetOrders removes all previously related items of the
-// item replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.Item's Orders accordingly.
-// Replaces o.R.Orders with related.
-// Sets related.R.Item's Orders accordingly.
-func (o *Item) SetOrders(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Order) error {
-	query := "update \"orders\" set \"item_id\" = null where \"item_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	_, err := exec.ExecContext(ctx, query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Orders {
-			queries.SetScanner(&rel.ItemID, nil)
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.Item = nil
-		}
-
-		o.R.Orders = nil
-	}
-	return o.AddOrders(ctx, exec, insert, related...)
-}
-
-// RemoveOrders relationships from objects passed in.
-// Removes related items from R.Orders (uses pointer comparison, removal does not keep order)
-// Sets related.R.Item.
-func (o *Item) RemoveOrders(ctx context.Context, exec boil.ContextExecutor, related ...*Order) error {
-	var err error
-	for _, rel := range related {
-		queries.SetScanner(&rel.ItemID, nil)
-		if rel.R != nil {
-			rel.R.Item = nil
-		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("item_id")); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Orders {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Orders)
-			if ln > 1 && i < ln-1 {
-				o.R.Orders[i] = o.R.Orders[ln-1]
-			}
-			o.R.Orders = o.R.Orders[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

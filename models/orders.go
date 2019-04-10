@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -25,10 +24,10 @@ import (
 // Order is an object representing the database table.
 type Order struct {
 	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID    null.Int  `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	ItemID    null.Int  `boil:"item_id" json:"item_id,omitempty" toml:"item_id" yaml:"item_id,omitempty"`
-	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	UserID    int       `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	ItemID    int       `boil:"item_id" json:"item_id" toml:"item_id" yaml:"item_id"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *orderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L orderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -50,41 +49,18 @@ var OrderColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Time struct{ field string }
-
-func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var OrderWhere = struct {
 	ID        whereHelperint
-	UserID    whereHelpernull_Int
-	ItemID    whereHelpernull_Int
-	CreatedAt whereHelpernull_Time
-	UpdatedAt whereHelpernull_Time
+	UserID    whereHelperint
+	ItemID    whereHelperint
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint{field: `id`},
-	UserID:    whereHelpernull_Int{field: `user_id`},
-	ItemID:    whereHelpernull_Int{field: `item_id`},
-	CreatedAt: whereHelpernull_Time{field: `created_at`},
-	UpdatedAt: whereHelpernull_Time{field: `updated_at`},
+	UserID:    whereHelperint{field: `user_id`},
+	ItemID:    whereHelperint{field: `item_id`},
+	CreatedAt: whereHelpertime_Time{field: `created_at`},
+	UpdatedAt: whereHelpertime_Time{field: `updated_at`},
 }
 
 // OrderRels is where relationship names are stored.
@@ -437,9 +413,7 @@ func (orderL) LoadItem(ctx context.Context, e boil.ContextExecutor, singular boo
 		if object.R == nil {
 			object.R = &orderR{}
 		}
-		if !queries.IsNil(object.ItemID) {
-			args = append(args, object.ItemID)
-		}
+		args = append(args, object.ItemID)
 
 	} else {
 	Outer:
@@ -449,14 +423,12 @@ func (orderL) LoadItem(ctx context.Context, e boil.ContextExecutor, singular boo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.ItemID) {
+				if a == obj.ItemID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.ItemID) {
-				args = append(args, obj.ItemID)
-			}
+			args = append(args, obj.ItemID)
 
 		}
 	}
@@ -511,7 +483,7 @@ func (orderL) LoadItem(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.ItemID, foreign.ID) {
+			if local.ItemID == foreign.ID {
 				local.R.Item = foreign
 				if foreign.R == nil {
 					foreign.R = &itemR{}
@@ -542,9 +514,7 @@ func (orderL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular boo
 		if object.R == nil {
 			object.R = &orderR{}
 		}
-		if !queries.IsNil(object.UserID) {
-			args = append(args, object.UserID)
-		}
+		args = append(args, object.UserID)
 
 	} else {
 	Outer:
@@ -554,14 +524,12 @@ func (orderL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular boo
 			}
 
 			for _, a := range args {
-				if queries.Equal(a, obj.UserID) {
+				if a == obj.UserID {
 					continue Outer
 				}
 			}
 
-			if !queries.IsNil(obj.UserID) {
-				args = append(args, obj.UserID)
-			}
+			args = append(args, obj.UserID)
 
 		}
 	}
@@ -616,7 +584,7 @@ func (orderL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular boo
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if queries.Equal(local.UserID, foreign.ID) {
+			if local.UserID == foreign.ID {
 				local.R.User = foreign
 				if foreign.R == nil {
 					foreign.R = &userR{}
@@ -657,7 +625,7 @@ func (o *Order) SetItem(ctx context.Context, exec boil.ContextExecutor, insert b
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.ItemID, related.ID)
+	o.ItemID = related.ID
 	if o.R == nil {
 		o.R = &orderR{
 			Item: related,
@@ -674,37 +642,6 @@ func (o *Order) SetItem(ctx context.Context, exec boil.ContextExecutor, insert b
 		related.R.Orders = append(related.R.Orders, o)
 	}
 
-	return nil
-}
-
-// RemoveItem relationship.
-// Sets o.R.Item to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Order) RemoveItem(ctx context.Context, exec boil.ContextExecutor, related *Item) error {
-	var err error
-
-	queries.SetScanner(&o.ItemID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("item_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.R.Item = nil
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Orders {
-		if queries.Equal(o.ItemID, ri.ItemID) {
-			continue
-		}
-
-		ln := len(related.R.Orders)
-		if ln > 1 && i < ln-1 {
-			related.R.Orders[i] = related.R.Orders[ln-1]
-		}
-		related.R.Orders = related.R.Orders[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -735,7 +672,7 @@ func (o *Order) SetUser(ctx context.Context, exec boil.ContextExecutor, insert b
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	queries.Assign(&o.UserID, related.ID)
+	o.UserID = related.ID
 	if o.R == nil {
 		o.R = &orderR{
 			User: related,
@@ -752,37 +689,6 @@ func (o *Order) SetUser(ctx context.Context, exec boil.ContextExecutor, insert b
 		related.R.Orders = append(related.R.Orders, o)
 	}
 
-	return nil
-}
-
-// RemoveUser relationship.
-// Sets o.R.User to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Order) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
-	var err error
-
-	queries.SetScanner(&o.UserID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.R.User = nil
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Orders {
-		if queries.Equal(o.UserID, ri.UserID) {
-			continue
-		}
-
-		ln := len(related.R.Orders)
-		if ln > 1 && i < ln-1 {
-			related.R.Orders[i] = related.R.Orders[ln-1]
-		}
-		related.R.Orders = related.R.Orders[:ln-1]
-		break
-	}
 	return nil
 }
 
@@ -829,11 +735,11 @@ func (o *Order) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
 		}
-		if queries.MustTime(o.UpdatedAt).IsZero() {
-			queries.SetScanner(&o.UpdatedAt, currTime)
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
 		}
 	}
 
@@ -913,7 +819,7 @@ func (o *Order) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	var err error
@@ -1049,10 +955,10 @@ func (o *Order) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
 		}
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

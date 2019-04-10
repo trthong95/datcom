@@ -1,6 +1,6 @@
 package store
 
-import "gitlab.com/thongnt/lunch-order/models"
+import "datcom/backend/models"
 
 type Migrator interface {
 	MigrateDB() error

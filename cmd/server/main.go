@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 
+	"datcom/backend/src/store"
+
 	_ "github.com/lib/pq"
-	"gitlab.com/thongnt/lunch-order/src/store"
 )
 
 func main() {

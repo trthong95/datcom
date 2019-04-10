@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"gitlab.com/thongnt/lunch-order/src/store"
+	"datcom/backend/src/store"
 )
 
 func main() {

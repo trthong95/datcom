@@ -62,10 +62,10 @@ var allMigrations = []*migrate.Migration{
 		Id: "1",
 		Up: []string{`
 		CREATE TABLE users (
-		id SERIAL PRIMARY KEY,
-		name  VARCHAR NOT NULL,
-		email VARCHAR UNIQUE NOT NULL,
-		token VARCHAR NOT NULL
+			id SERIAL PRIMARY KEY,
+			name  VARCHAR NOT NULL,
+			email VARCHAR UNIQUE NOT NULL,
+			token VARCHAR NOT NULL
 		);
 		CREATE TABLE people_in_charge (
 			user_id INT PRIMARY KEY,
@@ -78,7 +78,7 @@ var allMigrations = []*migrate.Migration{
 			created_at TIMESTAMPTZ NOT NULL,
 			deadline TIMESTAMPTZ NOT NULL,
 			payment_reminder TIMESTAMPTZ NOT NULL,
-			status INT
+			status INT NOT NULL
 		);
 		CREATE TABLE items (
 			id SERIAL PRIMARY KEY,

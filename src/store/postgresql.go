@@ -74,7 +74,7 @@ var allMigrations = []*migrate.Migration{
 		CREATE TABLE menus (
 			id SERIAL PRIMARY KEY,
 			owner_id INT NOT NULL,
-			menu_name VARCHAR,
+			menu_name VARCHAR UNIQUE NOT NULL,
 			created_at TIMESTAMPTZ NOT NULL,
 			deadline TIMESTAMPTZ NOT NULL,
 			payment_reminder TIMESTAMPTZ NOT NULL,

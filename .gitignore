@@ -41,3 +41,4 @@ sqlboiler.toml
 
 # End of https://www.gitignore.io/api/go,linux
 
+.idea/

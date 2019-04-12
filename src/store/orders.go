@@ -9,19 +9,33 @@ import (
 	"datcom/backend/models"
 )
 
+// Inserts orders to database
 func (store *storePostgres) AddOrders(userID int, itemID int) error {
 	var order models.Order
-	var err error
 	order.UserID = userID
 	order.ItemID = itemID
-	// First find the order if it exists
-	result, err := models.Orders(qm.Where("user_id=? and item_id=?", userID, itemID)).One(context.Background(), store.db)
-	if result == nil {
+	// First check if the order exists
+	exists, err := models.Orders(qm.Where("user_id=? and item_id=?", userID, itemID)).Exists(context.Background(), store.db)
+	if exists == false {
 		// If not exist, insert new order
 		err = order.Insert(context.Background(), store.db, boil.Infer())
 	} else {
 		// Else do nothing
 		err = nil
+	}
+	return err
+}
+
+//Delete existing orders in database
+func (store *storePostgres) DeleteOrders(userID int, itemID int) error {
+	var order *models.Order
+	// Select the order
+	order, err := models.Orders(qm.Where("user_id=? and item_id=?", userID, itemID)).One(context.Background(), store.db)
+	if &order == nil {
+		// If not exists, do nothing
+	} else {
+		// If exists, delete the order
+		_, err = order.Delete(context.Background(), store.db)
 	}
 	return err
 }

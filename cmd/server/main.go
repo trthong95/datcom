@@ -21,7 +21,8 @@ func main() {
 		fmt.Println(err)
 	}
 
-	err = store.AddOrders(1, 2)
+	err = store.AddOrders(1, 1)
+	// err = store.DeleteOrders(1, 1)
 	if err != nil {
 		fmt.Println(err)
 	} else {

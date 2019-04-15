@@ -15,4 +15,6 @@ type Store interface {
 	GetAllUsers() ([]*models.User, error)
 	CreateUser(p *PersonInfo) error
 	InsertItemsToDB(itemNames []string, menuName string) error
+	AddOrders(userID int, itemID int) error
+	DeleteOrders(userID int, itemID int) error
 }

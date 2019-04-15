@@ -5,7 +5,6 @@ import (
 
 	"datcom/backend/src/store"
 
-	"github.com/k0kubun/pp"
 	_ "github.com/lib/pq"
 )
 
@@ -22,17 +21,11 @@ func main() {
 		fmt.Println(err)
 	}
 
-	p := store.PersonInfo{"Thong Nguyen", "nguyentrthong95@gmail.com", "xyz"}
-	err = storeif.CreateUser(&p)
+	err = store.AddOrders(1, 1)
+	// err = store.DeleteOrders(1, 1)
 	if err != nil {
 		fmt.Println(err)
-	}
-
-	users, err := storeif.GetAllUsers()
-	if err != nil {
-		fmt.Println(err)
-	}
-	for _, user := range users {
-		pp.Println(user)
+	} else {
+		fmt.Println("OK")
 	}
 }

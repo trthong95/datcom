@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -21,7 +22,7 @@ func (store *storePostgres) AddOrders(userID int, itemID int) error {
 		err = order.Insert(context.Background(), store.db, boil.Infer())
 	} else {
 		// Else do nothing
-		err = nil
+		return errors.New("Order already exist")
 	}
 	return err
 }
@@ -30,12 +31,24 @@ func (store *storePostgres) AddOrders(userID int, itemID int) error {
 func (store *storePostgres) DeleteOrders(userID int, itemID int) error {
 	var order *models.Order
 	// Select the order
-	order, err := models.Orders(qm.Where("user_id=? and item_id=?", userID, itemID)).One(context.Background(), store.db)
-	if &order == nil {
+	order, _ = models.Orders(qm.Where("user_id=? and item_id=?", userID, itemID)).One(context.Background(), store.db)
+	if order == nil {
 		// If not exists, do nothing
-	} else {
-		// If exists, delete the order
-		_, err = order.Delete(context.Background(), store.db)
+		return errors.New("Order does not exist")
 	}
+	_, err := order.Delete(context.Background(), store.db)
+
 	return err
+}
+
+// Get items in user order
+func (store *storePostgres) GetOrder(userID int) ([]*models.Item, error) {
+	// Get orders of the user
+	orders, err := models.Orders(qm.Where("user_id=?", userID)).All(context.Background(), store.db)
+	items := make([]*models.Item, len(orders))
+	for i, order := range orders {
+		items[i], err = models.Items(qm.Where("id=?", order.ItemID)).One(context.Background(), store.db)
+	}
+
+	return items, err
 }

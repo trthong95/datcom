@@ -7,8 +7,8 @@ import (
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
-	"datcom/backend/models"
-	"datcom/backend/src/store/item"
+	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/store/item"
 )
 
 type OrderService struct {

@@ -1,10 +1,11 @@
 package service
 
 import (
-	"datcom/backend/src/store/item"
-	"datcom/backend/src/store/order"
 	"reflect"
 	"testing"
+
+	"git.d.foundation/datcom/backend/src/store/item"
+	"git.d.foundation/datcom/backend/src/store/order"
 )
 
 func TestService_AddOrder(t *testing.T) {

@@ -4,8 +4,9 @@
 package order
 
 import (
-	"datcom/backend/src/store/item"
 	"sync"
+
+	"git.d.foundation/datcom/backend/src/store/item"
 )
 
 var (

@@ -1,9 +1,10 @@
 package service
 
 import (
-	"datcom/backend/src/store/item"
-	"datcom/backend/src/store/order"
 	"errors"
+
+	"git.d.foundation/datcom/backend/src/store/item"
+	"git.d.foundation/datcom/backend/src/store/order"
 )
 
 //AddOrder Add order to resource

@@ -1,6 +1,6 @@
 package order
 
-import "datcom/backend/src/store/item"
+import "git.d.foundation/datcom/backend/src/store/item"
 
 type Service interface {
 	Add(o *Order) error

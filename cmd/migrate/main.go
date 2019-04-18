@@ -7,7 +7,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"datcom/backend/src/store"
+	"git.d.foundation/datcom/backend/src/store"
 )
 
 func main() {

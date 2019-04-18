@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"database/sql"
-	"datcom/backend/models"
-	"datcom/backend/src/domain"
+	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/domain"
 	"errors"
 
 	"github.com/volatiletech/sqlboiler/boil"

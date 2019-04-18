@@ -20,3 +20,6 @@ local-env:
 dev:
 	go build -o bin/server ./cmd/server
 	bin/server
+
+test:
+	go test git.d.foundation/datcom/backend/src/service

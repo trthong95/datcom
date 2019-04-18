@@ -1,8 +1,8 @@
 package user
 
 import (
-	"datcom/backend/models"
-	"datcom/backend/src/domain"
+	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/domain"
 )
 
 type Service interface {

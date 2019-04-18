@@ -22,17 +22,6 @@ func NewPostgresMigrator(connectionString string) (Migrator, error) {
 	}, nil
 }
 
-func NewPostgresStore(connectionString string) (Store, error) {
-	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		return nil, err
-	}
-
-	return &storePostgres{
-		db: db,
-	}, nil
-}
-
 func (store *storePostgres) MigrateDB() error {
 	migrations := &migrate.MemoryMigrationSource{
 		Migrations: allMigrations,
@@ -41,7 +30,7 @@ func (store *storePostgres) MigrateDB() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("db.migrations: Migrate %d migrations", n)
+	fmt.Printf("db.migrations: Migrate %d migrations", n)
 	return nil
 }
 
@@ -53,7 +42,7 @@ func (store *storePostgres) ReverseDB() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("db.migrations: reversed %d migrations", n)
+	fmt.Printf("db.migrations: reversed %d migrations", n)
 	return nil
 }
 

@@ -11,17 +11,17 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
 
-type UserService struct {
+type userService struct {
 	db *sql.DB
 }
 
 func NewService(db *sql.DB) Service {
-	return &UserService{
+	return &userService{
 		db: db,
 	}
 }
 
-func (us *UserService) Create(p *domain.PersonInfo) (*models.User, error) {
+func (us *userService) Create(p *domain.PersonInfo) (*models.User, error) {
 	u := &models.User{Name: p.Name, Email: p.Email, Token: p.Token}
 	err := u.Insert(context.Background(), us.db, boil.Infer())
 	if err != nil {
@@ -30,12 +30,12 @@ func (us *UserService) Create(p *domain.PersonInfo) (*models.User, error) {
 	return us.Find(p)
 }
 
-func (us *UserService) Find(p *domain.PersonInfo) (*models.User, error) {
+func (us *userService) Find(p *domain.PersonInfo) (*models.User, error) {
 	user, _ := models.Users(qm.Where("email=?", p.Email)).One(context.Background(), us.db)
 	return user, nil
 }
 
-func (us *UserService) FindAll() ([]*models.User, error) {
+func (us *userService) FindAll() ([]*models.User, error) {
 	users, err := models.Users().All(context.Background(), us.db)
 	return users, err
 }

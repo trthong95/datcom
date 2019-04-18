@@ -10,7 +10,7 @@ import (
 func (s *Service) CreateUser(p *domain.PersonInfo) (*models.User, error) {
 	u, err := s.User.Find(p)
 	if err != nil {
-		return nil, err
+		return &models.User{}, err
 	}
 	if u == nil {
 		return s.User.Create(p)

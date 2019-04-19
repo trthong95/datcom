@@ -1,0 +1,26 @@
+image: golang:1.12
+
+stages:
+  - build
+  - test
+  
+cache:
+  paths:
+    - .cache
+
+stages:
+  - build
+  - test
+
+before_script:
+  - export GOPATH="$CI_PROJECT_DIR/.cache"
+
+test:
+  stage: test
+  script:
+    - make test
+
+build:
+  stage: build
+  script:
+    - make build

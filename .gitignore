@@ -21,7 +21,7 @@ sqlboiler.toml
 *.out
 
 ### Go Patch ###
- /vendor/
+/vendor/
 /Godeps/
 
 ### Linux ###
@@ -42,3 +42,6 @@ sqlboiler.toml
 # End of https://www.gitignore.io/api/go,linux
 
 .idea/
+
+# VSCode config folder
+.vscode/

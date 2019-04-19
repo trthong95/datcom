@@ -1,14 +1,18 @@
 package handler
 
-// type CoreHandler {
-// 	service *service.Service
-// }
+import (
+	"git.d.foundation/datcom/backend/src/service"
+)
 
-// func NewCoreHandler( service *service.Service) {
-// 	return CoreHandler{
+type CoreHandler struct {
+	service *service.Service
+}
 
-// 	}
-// }
+func NewCoreHandler(service *service.Service) *CoreHandler {
+	return &CoreHandler{
+		service: service,
+	}
+}
 
 // func (c *CoreHandler) GetUser(rw, resp) {
 // 	req => input

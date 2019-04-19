@@ -23,3 +23,6 @@ dev:
 
 test:
 	go test git.d.foundation/datcom/backend/src/service
+
+test-output:
+	go test -cover -v git.d.foundation/datcom/backend/src/service -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html

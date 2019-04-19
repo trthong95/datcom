@@ -4,11 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/k0kubun/pp"
+	_ "github.com/lib/pq"
 
 	"git.d.foundation/datcom/backend/src/domain"
 	"git.d.foundation/datcom/backend/src/service"
-
-	_ "github.com/lib/pq"
 )
 
 func main() {

@@ -1,14 +1,13 @@
 package service
 
 import (
-	"git.d.foundation/datcom/backend/models"
-	"git.d.foundation/datcom/backend/src/domain"
-	"git.d.foundation/datcom/backend/src/store/user"
 	"errors"
 	"reflect"
 	"testing"
 
-	"github.com/k0kubun/pp"
+	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/domain"
+	"git.d.foundation/datcom/backend/src/store/user"
 )
 
 func TestService_GetAllUser(t *testing.T) {
@@ -79,7 +78,6 @@ func TestService_GetAllUser(t *testing.T) {
 				User: &tt.fields.User,
 			}
 			got, err := s.GetAllUser()
-			pp.Println(got)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Service.GetAllUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -114,7 +112,7 @@ func TestService_CreateUser(t *testing.T) {
 						return &models.User{
 							ID:    100,
 							Name:  "Demo1",
-							Email: "Demo@email.com",
+							Email: "Demo1@email.com",
 							Token: "ABCD",
 						}, nil
 					},
@@ -126,14 +124,14 @@ func TestService_CreateUser(t *testing.T) {
 			args: args{
 				&domain.PersonInfo{
 					Name:  "Demo1",
-					Email: "Demo@email.com",
+					Email: "Demo1@email.com",
 					Token: "ABCD",
 				},
 			},
 			want: &models.User{
 				ID:    100,
-				Email: "demo",
-				Name:  "demo",
+				Email: "Demo1@email.com",
+				Name:  "Demo1",
 				Token: "ABCD",
 			},
 			wantErr: false,
@@ -143,13 +141,13 @@ func TestService_CreateUser(t *testing.T) {
 			fields: fields{
 				user.ServiceMock{
 					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
-						return &models.User{}, nil
+						return nil, nil
 					},
 					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
 						return &models.User{
 							ID:    100,
 							Name:  "Demo2",
-							Email: "Demo@email.com",
+							Email: "Demo2@email.com",
 							Token: "ABCD",
 						}, nil
 					},
@@ -158,11 +156,11 @@ func TestService_CreateUser(t *testing.T) {
 			args: args{
 				&domain.PersonInfo{
 					Name:  "Demo2",
-					Email: "Demo@email.com",
+					Email: "Demo2@email.com",
 					Token: "ABCD",
 				},
 			},
-			want:    &models.User{},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -170,15 +168,41 @@ func TestService_CreateUser(t *testing.T) {
 			fields: fields{
 				user.ServiceMock{
 					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
-						return &models.User{}, errors.New("Find errors")
+						return nil, errors.New("Find errors")
 					},
 					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
-						return &models.User{}, errors.New("Find errors")
+						return nil, errors.New("Find errors")
 					},
 				},
 			},
 			args: args{
-				&domain.PersonInfo{},
+				&domain.PersonInfo{
+					Name:  "Demo3",
+					Email: "Demo3@gmail.com",
+					Token: "ABCD",
+				},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "Invalid email format",
+			fields: fields{
+				user.ServiceMock{
+					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
+						return &models.User{}, nil
+					},
+					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
+						return &models.User{}, nil
+					},
+				},
+			},
+			args: args{
+				&domain.PersonInfo{
+					Name:  "Demo4",
+					Email: "Demo2invalidemail",
+					Token: "ABCD",
+				},
 			},
 			want:    &models.User{},
 			wantErr: true,
@@ -194,8 +218,16 @@ func TestService_CreateUser(t *testing.T) {
 				t.Errorf("Service.CreateUser() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got.ID, tt.want.ID) {
-				t.Errorf("Service.CreateUser() = %v, want %v", got.ID, tt.want.ID)
+			if (got == nil) != tt.wantErr {
+				if !reflect.DeepEqual(got.ID, tt.want.ID) {
+					t.Errorf("Service.CreateUser() = %v, want %v", got.ID, tt.want.ID)
+				}
+				if !reflect.DeepEqual(got.Email, tt.want.Email) {
+					t.Errorf("Service.CreateUser() = %v, want %v", got.Email, tt.want.Email)
+				}
+				if !reflect.DeepEqual(got.Token, tt.want.Token) {
+					t.Errorf("Service.CreateUser() = %v, want %v", got.Token, tt.want.Token)
+				}
 			}
 		})
 	}

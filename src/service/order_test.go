@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"git.d.foundation/datcom/backend/models"
 	"git.d.foundation/datcom/backend/src/store/item"
 	"git.d.foundation/datcom/backend/src/store/order"
 )
@@ -26,11 +27,11 @@ func TestService_AddOrder(t *testing.T) {
 			name: "Test AddOrder() when order does not exist",
 			fields: fields{
 				order.ServiceMock{
-					ExistFunc: func(o *order.Order) bool {
-						return false
+					ExistFunc: func(o *order.Order) (bool, error) {
+						return false, nil
 					},
-					AddFunc: func(o *order.Order) error {
-						return nil
+					AddFunc: func(o *order.Order) (*models.Order, error) {
+						return nil, nil
 					},
 				},
 			},
@@ -40,8 +41,8 @@ func TestService_AddOrder(t *testing.T) {
 			name: "Test AddOrder() when order exists",
 			fields: fields{
 				order.ServiceMock{
-					ExistFunc: func(o *order.Order) bool {
-						return true
+					ExistFunc: func(o *order.Order) (bool, error) {
+						return true, nil
 					},
 				},
 			},
@@ -53,7 +54,7 @@ func TestService_AddOrder(t *testing.T) {
 			s := &Service{
 				Order: &tt.fields.Order,
 			}
-			if err := s.AddOrder(tt.args.o); (err != nil) != tt.wantErr {
+			if _, err := s.AddOrder(tt.args.o); (err != nil) != tt.wantErr {
 				t.Errorf("Service.AddOrder() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -78,8 +79,8 @@ func TestService_DeleteOrder(t *testing.T) {
 			name: "Test DeleteOrder() when order exists",
 			fields: fields{
 				order.ServiceMock{
-					ExistFunc: func(o *order.Order) bool {
-						return true
+					ExistFunc: func(o *order.Order) (bool, error) {
+						return true, nil
 					},
 					DeleteFunc: func(o *order.Order) error {
 						return nil
@@ -92,8 +93,8 @@ func TestService_DeleteOrder(t *testing.T) {
 			name: "Test DeleteOrder() when order does not exist",
 			fields: fields{
 				order.ServiceMock{
-					ExistFunc: func(o *order.Order) bool {
-						return false
+					ExistFunc: func(o *order.Order) (bool, error) {
+						return false, nil
 					},
 				},
 			},
@@ -112,7 +113,7 @@ func TestService_DeleteOrder(t *testing.T) {
 	}
 }
 
-func TestService_GetOrders(t *testing.T) {
+func TestService_GetOrdersByUserID(t *testing.T) {
 	type fields struct {
 		Order order.ServiceMock
 	}
@@ -144,13 +145,13 @@ func TestService_GetOrders(t *testing.T) {
 			s := &Service{
 				Order: &tt.fields.Order,
 			}
-			got, err := s.GetOrders(tt.args.userID)
+			got, err := s.GetOrdersByUserID(tt.args.userID)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Service.GetOrders() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Service.GetOrdersByUserID() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Service.GetOrders() = %v, want %v", got, tt.want)
+				t.Errorf("Service.GetOrdersByUserID() = %v, want %v", got, tt.want)
 			}
 		})
 	}

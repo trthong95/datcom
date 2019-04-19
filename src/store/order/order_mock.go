@@ -6,6 +6,7 @@ package order
 import (
 	"sync"
 
+	"git.d.foundation/datcom/backend/models"
 	"git.d.foundation/datcom/backend/src/store/item"
 )
 
@@ -26,13 +27,13 @@ var _ Service = &ServiceMock{}
 //
 //         // make and configure a mocked Service
 //         mockedService := &ServiceMock{
-//             AddFunc: func(o *Order) error {
+//             AddFunc: func(o *Order) (*models.Order, error) {
 // 	               panic("mock out the Add method")
 //             },
 //             DeleteFunc: func(o *Order) error {
 // 	               panic("mock out the Delete method")
 //             },
-//             ExistFunc: func(o *Order) bool {
+//             ExistFunc: func(o *Order) (bool, error) {
 // 	               panic("mock out the Exist method")
 //             },
 //             GetFunc: func(userID int) ([]*item.Item, error) {
@@ -46,13 +47,13 @@ var _ Service = &ServiceMock{}
 //     }
 type ServiceMock struct {
 	// AddFunc mocks the Add method.
-	AddFunc func(o *Order) error
+	AddFunc func(o *Order) (*models.Order, error)
 
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(o *Order) error
 
 	// ExistFunc mocks the Exist method.
-	ExistFunc func(o *Order) bool
+	ExistFunc func(o *Order) (bool, error)
 
 	// GetFunc mocks the Get method.
 	GetFunc func(userID int) ([]*item.Item, error)
@@ -83,7 +84,7 @@ type ServiceMock struct {
 }
 
 // Add calls AddFunc.
-func (mock *ServiceMock) Add(o *Order) error {
+func (mock *ServiceMock) Add(o *Order) (*models.Order, error) {
 	if mock.AddFunc == nil {
 		panic("ServiceMock.AddFunc: method is nil but Service.Add was just called")
 	}
@@ -145,7 +146,7 @@ func (mock *ServiceMock) DeleteCalls() []struct {
 }
 
 // Exist calls ExistFunc.
-func (mock *ServiceMock) Exist(o *Order) bool {
+func (mock *ServiceMock) Exist(o *Order) (bool, error) {
 	if mock.ExistFunc == nil {
 		panic("ServiceMock.ExistFunc: method is nil but Service.Exist was just called")
 	}

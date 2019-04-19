@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"git.d.foundation/datcom/backend/models"
-	"git.d.foundation/datcom/backend/src/store/item"
+	"git.d.foundation/datcom/backend/src/domain"
 )
 
 var (
@@ -27,16 +27,16 @@ var _ Service = &ServiceMock{}
 //
 //         // make and configure a mocked Service
 //         mockedService := &ServiceMock{
-//             AddFunc: func(o *Order) (*models.Order, error) {
+//             AddFunc: func(o *domain.OrderInput) (*models.Order, error) {
 // 	               panic("mock out the Add method")
 //             },
-//             DeleteFunc: func(o *Order) error {
+//             DeleteFunc: func(o *domain.OrderInput) error {
 // 	               panic("mock out the Delete method")
 //             },
-//             ExistFunc: func(o *Order) (bool, error) {
+//             ExistFunc: func(o *domain.OrderInput) (bool, error) {
 // 	               panic("mock out the Exist method")
 //             },
-//             GetFunc: func(userID int) ([]*item.Item, error) {
+//             GetFunc: func(userID int) ([]*domain.Item, error) {
 // 	               panic("mock out the Get method")
 //             },
 //         }
@@ -47,33 +47,33 @@ var _ Service = &ServiceMock{}
 //     }
 type ServiceMock struct {
 	// AddFunc mocks the Add method.
-	AddFunc func(o *Order) (*models.Order, error)
+	AddFunc func(o *domain.OrderInput) (*models.Order, error)
 
 	// DeleteFunc mocks the Delete method.
-	DeleteFunc func(o *Order) error
+	DeleteFunc func(o *domain.OrderInput) error
 
 	// ExistFunc mocks the Exist method.
-	ExistFunc func(o *Order) (bool, error)
+	ExistFunc func(o *domain.OrderInput) (bool, error)
 
 	// GetFunc mocks the Get method.
-	GetFunc func(userID int) ([]*item.Item, error)
+	GetFunc func(userID int) ([]*domain.Item, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
 		// Add holds details about calls to the Add method.
 		Add []struct {
 			// O is the o argument value.
-			O *Order
+			O *domain.OrderInput
 		}
 		// Delete holds details about calls to the Delete method.
 		Delete []struct {
 			// O is the o argument value.
-			O *Order
+			O *domain.OrderInput
 		}
 		// Exist holds details about calls to the Exist method.
 		Exist []struct {
 			// O is the o argument value.
-			O *Order
+			O *domain.OrderInput
 		}
 		// Get holds details about calls to the Get method.
 		Get []struct {
@@ -84,12 +84,12 @@ type ServiceMock struct {
 }
 
 // Add calls AddFunc.
-func (mock *ServiceMock) Add(o *Order) (*models.Order, error) {
+func (mock *ServiceMock) Add(o *domain.OrderInput) (*models.Order, error) {
 	if mock.AddFunc == nil {
 		panic("ServiceMock.AddFunc: method is nil but Service.Add was just called")
 	}
 	callInfo := struct {
-		O *Order
+		O *domain.OrderInput
 	}{
 		O: o,
 	}
@@ -103,10 +103,10 @@ func (mock *ServiceMock) Add(o *Order) (*models.Order, error) {
 // Check the length with:
 //     len(mockedService.AddCalls())
 func (mock *ServiceMock) AddCalls() []struct {
-	O *Order
+	O *domain.OrderInput
 } {
 	var calls []struct {
-		O *Order
+		O *domain.OrderInput
 	}
 	lockServiceMockAdd.RLock()
 	calls = mock.calls.Add
@@ -115,12 +115,12 @@ func (mock *ServiceMock) AddCalls() []struct {
 }
 
 // Delete calls DeleteFunc.
-func (mock *ServiceMock) Delete(o *Order) error {
+func (mock *ServiceMock) Delete(o *domain.OrderInput) error {
 	if mock.DeleteFunc == nil {
 		panic("ServiceMock.DeleteFunc: method is nil but Service.Delete was just called")
 	}
 	callInfo := struct {
-		O *Order
+		O *domain.OrderInput
 	}{
 		O: o,
 	}
@@ -134,10 +134,10 @@ func (mock *ServiceMock) Delete(o *Order) error {
 // Check the length with:
 //     len(mockedService.DeleteCalls())
 func (mock *ServiceMock) DeleteCalls() []struct {
-	O *Order
+	O *domain.OrderInput
 } {
 	var calls []struct {
-		O *Order
+		O *domain.OrderInput
 	}
 	lockServiceMockDelete.RLock()
 	calls = mock.calls.Delete
@@ -146,12 +146,12 @@ func (mock *ServiceMock) DeleteCalls() []struct {
 }
 
 // Exist calls ExistFunc.
-func (mock *ServiceMock) Exist(o *Order) (bool, error) {
+func (mock *ServiceMock) Exist(o *domain.OrderInput) (bool, error) {
 	if mock.ExistFunc == nil {
 		panic("ServiceMock.ExistFunc: method is nil but Service.Exist was just called")
 	}
 	callInfo := struct {
-		O *Order
+		O *domain.OrderInput
 	}{
 		O: o,
 	}
@@ -165,10 +165,10 @@ func (mock *ServiceMock) Exist(o *Order) (bool, error) {
 // Check the length with:
 //     len(mockedService.ExistCalls())
 func (mock *ServiceMock) ExistCalls() []struct {
-	O *Order
+	O *domain.OrderInput
 } {
 	var calls []struct {
-		O *Order
+		O *domain.OrderInput
 	}
 	lockServiceMockExist.RLock()
 	calls = mock.calls.Exist
@@ -177,7 +177,7 @@ func (mock *ServiceMock) ExistCalls() []struct {
 }
 
 // Get calls GetFunc.
-func (mock *ServiceMock) Get(userID int) ([]*item.Item, error) {
+func (mock *ServiceMock) Get(userID int) ([]*domain.Item, error) {
 	if mock.GetFunc == nil {
 		panic("ServiceMock.GetFunc: method is nil but Service.Get was just called")
 	}

@@ -2,12 +2,12 @@ package order
 
 import (
 	"git.d.foundation/datcom/backend/models"
-	"git.d.foundation/datcom/backend/src/store/item"
+	"git.d.foundation/datcom/backend/src/domain"
 )
 
 type Service interface {
-	Add(o *Order) (*models.Order, error)
-	Delete(o *Order) error
-	Exist(o *Order) (bool, error)
-	Get(userID int) ([]*item.Item, error)
+	Add(o *domain.OrderInput) (*models.Order, error)
+	Delete(o *domain.OrderInput) error
+	Exist(o *domain.OrderInput) (bool, error)
+	Get(userID int) ([]*domain.Item, error)
 }

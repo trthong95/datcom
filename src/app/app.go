@@ -1,55 +1,63 @@
 package app
 
 import (
-	"datcom/backend/src/store"
+	"database/sql"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
+
+	"git.d.foundation/datcom/backend/src/service"
 )
 
 // App struct for router and db
 type App struct {
-	Router *mux.Router
-	DB     store.Store
+	Router  *mux.Router
+	Service *service.Service
 }
 
-func (a *App) Init() {
+func (a *App) NewApp() (*App, error) {
 	connectionString := "user=postgres dbname=datcom sslmode=disable password=datcom host=localhost port=5432"
-	storeif, err := store.NewPostgresStore(connectionString)
+	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
-		log.Fatal("Could not connect to database")
+		return nil, errors.New("could not connect to database")
 	}
-	a.DB = storeif
+
+	a.Service = service.NewService(db)
+
 	a.Router = mux.NewRouter()
 	a.SetRouters()
+
+	return a, nil
 }
 
 func (a *App) SetRouters() {
-	a.Router.HandleFunc("/users", a.GetAllUsers).Methods("GET")
-	a.Router.HandleFunc("/users", a.CreateUser).Methods("POST")
+	a.Router.HandleFunc("/auth/google/login-url", a.GetGoogleLoginURL).Methods("GET")
+	a.Router.HandleFunc("/auth/login/google", a.VerifyGoogleUserLogin).Methods("POST")
 	a.Router.HandleFunc("/menus", a.GetAllMenus).Methods("GET")
 	a.Router.HandleFunc("/menus", a.CreateMenuFromItems).Methods("POST")
-	a.Router.HandleFunc("/menus/{name}", a.GetItemsFromMenu).Methods("GET")
-	a.Router.HandleFunc("/menus/{name}", a.AddItemsToMenu).Methods("POST")
-	a.Router.HandleFunc("/menus/{name}", a.DeleteMenu).Methods("DELETE")
-	a.Router.HandleFunc("/menus/{name}/{item}", a.DeleteItemFromMenu).Methods("DELETE")
-	a.Router.HandleFunc("/menus/{name}/people_in_charge", a.GetPeopleInCharge).Methods("GET")
-	a.Router.HandleFunc("/menus/{name}/people_in_charge", a.AddPeopleInCharge).Methods("POST")
-	a.Router.HandleFunc("/menus/{name}/summary", a.GetMenuSummary).Methods("GET")
+	a.Router.HandleFunc("/menus/{MenuID}", a.GetItemsFromMenu).Methods("GET")
+	a.Router.HandleFunc("/menus/{MenuID}", a.AddItemsToMenu).Methods("POST")
+	a.Router.HandleFunc("/menus/{MenuID}", a.DeleteMenu).Methods("DELETE")
+	a.Router.HandleFunc("/menus/{MenuID}/{ItemID}", a.DeleteItemFromMenu).Methods("DELETE")
+	a.Router.HandleFunc("/menus/{MenuID}/people-in-charge", a.GetPeopleInCharge).Methods("GET")
+	a.Router.HandleFunc("/menus/{MenuID}/people-in-charge", a.AddPeopleInCharge).Methods("POST")
+	a.Router.HandleFunc("/menus/{MenuID}/summary", a.GetMenuSummary).Methods("GET")
 	a.Router.HandleFunc("/orders", a.GetOrdersOfAllUsers).Methods("GET")
-	a.Router.HandleFunc("/orders/{user}", a.GetOrderOfUser).Methods("GET")
-	a.Router.HandleFunc("/orders/{user}", a.EditUserOrder).Methods("PUT")
-	a.Router.HandleFunc("/orders/{user}", a.CancelUserOrders).Methods("DELETE")
+	a.Router.HandleFunc("/orders/{UserID}", a.GetOrderOfUser).Methods("GET")
+	a.Router.HandleFunc("/orders/{UserID}", a.EditUserOrder).Methods("PUT")
+	a.Router.HandleFunc("/orders/{UserID}", a.DeleteOrders).Methods("DELETE")
 }
 
-func (a *App) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	// handler.GetAllUsers(a.DB, w, r)
+func (a *App) GetGoogleLoginURL(w http.ResponseWriter, r *http.Request) {
+	// handler.GetGoogleLoginURL(a.DB, w, r)
 	w.WriteHeader(http.StatusOK)
 }
 
-func (a *App) CreateUser(w http.ResponseWriter, r *http.Request) {
-	// handler.CreateUser(a.DB, w, r)
+func (a *App) VerifyGoogleUserLogin(w http.ResponseWriter, r *http.Request) {
+	// handler.VerifyGoogleUserLogin(a.DB, w, r)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -113,11 +121,12 @@ func (a *App) EditUserOrder(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (a *App) CancelUserOrders(w http.ResponseWriter, r *http.Request) {
-	// handler.CancelUserOrders(a.DB, w, r)
+func (a *App) DeleteOrders(w http.ResponseWriter, r *http.Request) {
+	// handler.DeleteOrders(a.DB, w, r)
 	w.WriteHeader(http.StatusOK)
 }
 
 func (a *App) RunServer(host string) {
+	fmt.Printf("server in running at %s\n", host)
 	log.Fatal(http.ListenAndServe(host, a.Router))
 }

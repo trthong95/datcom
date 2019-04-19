@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -24,13 +23,13 @@ import (
 
 // Menu is an object representing the database table.
 type Menu struct {
-	ID              int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	OwnerID         int         `boil:"owner_id" json:"owner_id" toml:"owner_id" yaml:"owner_id"`
-	MenuName        null.String `boil:"menu_name" json:"menu_name,omitempty" toml:"menu_name" yaml:"menu_name,omitempty"`
-	CreatedAt       time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	Deadline        time.Time   `boil:"deadline" json:"deadline" toml:"deadline" yaml:"deadline"`
-	PaymentReminder time.Time   `boil:"payment_reminder" json:"payment_reminder" toml:"payment_reminder" yaml:"payment_reminder"`
-	Status          int         `boil:"status" json:"status" toml:"status" yaml:"status"`
+	ID              int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	OwnerID         int       `boil:"owner_id" json:"owner_id" toml:"owner_id" yaml:"owner_id"`
+	MenuName        string    `boil:"menu_name" json:"menu_name" toml:"menu_name" yaml:"menu_name"`
+	CreatedAt       time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	Deadline        time.Time `boil:"deadline" json:"deadline" toml:"deadline" yaml:"deadline"`
+	PaymentReminder time.Time `boil:"payment_reminder" json:"payment_reminder" toml:"payment_reminder" yaml:"payment_reminder"`
+	Status          int       `boil:"status" json:"status" toml:"status" yaml:"status"`
 
 	R *menuR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L menuL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -56,29 +55,6 @@ var MenuColumns = struct {
 
 // Generated where
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 type whereHelpertime_Time struct{ field string }
 
 func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
@@ -103,7 +79,7 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 var MenuWhere = struct {
 	ID              whereHelperint
 	OwnerID         whereHelperint
-	MenuName        whereHelpernull_String
+	MenuName        whereHelperstring
 	CreatedAt       whereHelpertime_Time
 	Deadline        whereHelpertime_Time
 	PaymentReminder whereHelpertime_Time
@@ -111,7 +87,7 @@ var MenuWhere = struct {
 }{
 	ID:              whereHelperint{field: `id`},
 	OwnerID:         whereHelperint{field: `owner_id`},
-	MenuName:        whereHelpernull_String{field: `menu_name`},
+	MenuName:        whereHelperstring{field: `menu_name`},
 	CreatedAt:       whereHelpertime_Time{field: `created_at`},
 	Deadline:        whereHelpertime_Time{field: `deadline`},
 	PaymentReminder: whereHelpertime_Time{field: `payment_reminder`},

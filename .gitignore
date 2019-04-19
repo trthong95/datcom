@@ -45,3 +45,7 @@ sqlboiler.toml
 
 # VSCode config folder
 .vscode/
+
+# Code coverage
+coverage.out
+coverage.html

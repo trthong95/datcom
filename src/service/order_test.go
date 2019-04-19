@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -129,7 +130,7 @@ func TestService_GetOrdersByUserID(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "Test GetOrder()",
+			name: "Test GetOrder() success",
 			fields: fields{
 				order.ServiceMock{
 					GetFunc: func(userID int) ([]*item.Item, error) {
@@ -138,6 +139,17 @@ func TestService_GetOrdersByUserID(t *testing.T) {
 				},
 			},
 			wantErr: false,
+		},
+		{
+			name: "Test GetOrder() fail",
+			fields: fields{
+				order.ServiceMock{
+					GetFunc: func(userID int) ([]*item.Item, error) {
+						return nil, errors.New("failed")
+					},
+				},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

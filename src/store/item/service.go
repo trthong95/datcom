@@ -8,5 +8,7 @@ import (
 // Service ..
 type Service interface {
 	Add(*domain.Item) (*models.Item, error)
-	CheckItemExist(*domain.Item) (bool, error)
+	FindAnItem(i *Item) (*models.Item, error)
+	DeleteAnItem(i *models.Item) (*models.Item, error)
+	CheckItemExist(i *domain.Item) (bool, error)
 }

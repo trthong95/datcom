@@ -4,11 +4,13 @@
 package menu
 
 import (
+	"git.d.foundation/datcom/backend/models"
 	"sync"
 )
 
 var (
 	lockServiceMockCheckMenuExist sync.RWMutex
+	lockServiceMockFindMenu       sync.RWMutex
 )
 
 // Ensure, that ServiceMock does implement Service.
@@ -24,6 +26,9 @@ var _ Service = &ServiceMock{}
 //             CheckMenuExistFunc: func(menuID int) (bool, error) {
 // 	               panic("mock out the CheckMenuExist method")
 //             },
+//             FindMenuFunc: func(m *Menu) (*models.Menu, error) {
+// 	               panic("mock out the FindMenu method")
+//             },
 //         }
 //
 //         // use mockedService in code that requires Service
@@ -34,12 +39,20 @@ type ServiceMock struct {
 	// CheckMenuExistFunc mocks the CheckMenuExist method.
 	CheckMenuExistFunc func(menuID int) (bool, error)
 
+	// FindMenuFunc mocks the FindMenu method.
+	FindMenuFunc func(m *Menu) (*models.Menu, error)
+
 	// calls tracks calls to the methods.
 	calls struct {
 		// CheckMenuExist holds details about calls to the CheckMenuExist method.
 		CheckMenuExist []struct {
 			// MenuID is the menuID argument value.
 			MenuID int
+		}
+		// FindMenu holds details about calls to the FindMenu method.
+		FindMenu []struct {
+			// M is the m argument value.
+			M *Menu
 		}
 	}
 }
@@ -72,5 +85,36 @@ func (mock *ServiceMock) CheckMenuExistCalls() []struct {
 	lockServiceMockCheckMenuExist.RLock()
 	calls = mock.calls.CheckMenuExist
 	lockServiceMockCheckMenuExist.RUnlock()
+	return calls
+}
+
+// FindMenu calls FindMenuFunc.
+func (mock *ServiceMock) FindMenu(m *Menu) (*models.Menu, error) {
+	if mock.FindMenuFunc == nil {
+		panic("ServiceMock.FindMenuFunc: method is nil but Service.FindMenu was just called")
+	}
+	callInfo := struct {
+		M *Menu
+	}{
+		M: m,
+	}
+	lockServiceMockFindMenu.Lock()
+	mock.calls.FindMenu = append(mock.calls.FindMenu, callInfo)
+	lockServiceMockFindMenu.Unlock()
+	return mock.FindMenuFunc(m)
+}
+
+// FindMenuCalls gets all the calls that were made to FindMenu.
+// Check the length with:
+//     len(mockedService.FindMenuCalls())
+func (mock *ServiceMock) FindMenuCalls() []struct {
+	M *Menu
+} {
+	var calls []struct {
+		M *Menu
+	}
+	lockServiceMockFindMenu.RLock()
+	calls = mock.calls.FindMenu
+	lockServiceMockFindMenu.RUnlock()
 	return calls
 }

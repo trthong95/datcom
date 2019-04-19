@@ -21,7 +21,6 @@ func NewService(db *sql.DB) Service {
 		db: db,
 	}
 }
-
 func mapItemInputToModel(i *domain.Item) *models.Item {
 	return &models.Item{
 		ID:       i.ID,
@@ -40,4 +39,14 @@ func (s *itemService) CheckItemExist(i *domain.Item) (bool, error) {
 	return models.Items(
 		qm.Where("(item_name = ? AND menu_id = ?) OR (id = ? AND menu_id = ?)", item.ItemName, item.MenuID, item.ID, item.MenuID),
 	).Exists(context.Background(), s.db)
+}
+
+func (s *itemService) FindAnItem(i *Item) (*models.Item, error) {
+	it, err := models.FindItem(context.Background(), s.db, i.ID)
+	return it, err
+}
+
+func (s *itemService) DeleteAnItem(i *models.Item) (*models.Item, error) {
+	_, err := i.Delete(context.Background(), s.db)
+	return i, err
 }

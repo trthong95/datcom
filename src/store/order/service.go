@@ -10,4 +10,7 @@ type Service interface {
 	Delete(o *domain.OrderInput) error
 	Exist(o *domain.OrderInput) (bool, error)
 	Get(userID int) ([]*domain.Item, error)
+	DeleteByID(*models.Order) (*models.Order, error)
+	CheckOrderExistByItemID(ItemID int) (bool, error)
+	GetAllOrdersByItemID(ItemID int) ([]*models.Order, error)
 }

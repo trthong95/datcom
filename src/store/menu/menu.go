@@ -5,8 +5,7 @@ import (
 	"database/sql"
 
 	"git.d.foundation/datcom/backend/models"
-
-	"github.com/volatiletech/sqlboiler/queries/qm"
+	"git.d.foundation/datcom/backend/src/domain"
 )
 
 type menuService struct {
@@ -20,7 +19,18 @@ func NewService(db *sql.DB) Service {
 	}
 }
 
-func (s *menuService) FindMenu(m *Menu) (*models.Menu, error) {
-	menu, err := models.Menus(qm.Where("id = ? OR menu_name = ?", m.ID, m.MenuName)).One(context.Background(), s.db)
-	return menu, err
+func mapMenuInputToModel(mn *domain.MenuInput) *models.Menu {
+	return &models.Menu{
+		ID:              mn.ID,
+		OwnerID:         mn.OwnerID,
+		MenuName:        mn.MenuName,
+		Deadline:        mn.Deadline,
+		PaymentReminder: mn.PaymentReminder,
+		Status:          mn.Status,
+	}
+}
+
+func (s *menuService) FindByID(mn *domain.MenuInput) (*models.Menu, error) {
+	m := mapMenuInputToModel(mn)
+	return models.FindMenu(context.Background(), s.db, m.ID)
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/domain"
 	"git.d.foundation/datcom/backend/src/store/item"
 	"git.d.foundation/datcom/backend/src/store/menu"
 )
@@ -16,8 +17,8 @@ func TestService_AddItems(t *testing.T) {
 		Item item.ServiceMock
 	}
 	type args struct {
-		items *item.Items
-		mn    *menu.Menu
+		items *domain.ItemInput
+		mn    *domain.MenuInput
 	}
 	tests := []struct {
 		name    string
@@ -31,18 +32,17 @@ func TestService_AddItems(t *testing.T) {
 			name: "Pass",
 			fields: fields{
 				menu.ServiceMock{
-					FindMenuFunc: func(*menu.Menu) (*models.Menu, error) {
+					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
 						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
+							ID: 22,
 						}, nil
 					},
 				},
 				item.ServiceMock{
-					CheckItemExistFunc: func(*item.Item, *menu.Menu) (bool, error) {
+					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return false, nil
 					},
-					AddAnItemFunc: func(*item.Item) (*models.Item, error) {
+					AddFunc: func(*domain.Item) (*models.Item, error) {
 						return &models.Item{
 							ItemName: "Mon 7",
 							MenuID:   22,
@@ -51,15 +51,15 @@ func TestService_AddItems(t *testing.T) {
 				},
 			},
 			args: args{
-				items: &item.Items{
-					ItemNames: []item.Item{
+				items: &domain.ItemInput{
+					Items: []domain.Item{
 						{
 							ItemName: "Mon 7",
 						},
 					},
 				},
-				mn: &menu.Menu{
-					MenuName: "lunch_22_01_1995",
+				mn: &domain.MenuInput{
+					ID: 22,
 				},
 			},
 			want: []*models.Item{
@@ -71,37 +71,18 @@ func TestService_AddItems(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "NoMenu",
-			fields: fields{
-				menu.ServiceMock{
-					FindMenuFunc: func(*menu.Menu) (*models.Menu, error) {
-						return nil, errors.New("Non-exist-menu")
-
-					},
-				},
-				item.ServiceMock{},
-			},
-			args: args{
-				mn: &menu.Menu{
-					MenuName: "lunch_31_02_1995",
-				},
-			},
-			want:    nil,
-			wantErr: true,
-		},
-		{
 			name: "GetMenuFailed",
 			fields: fields{
 				menu.ServiceMock{
-					FindMenuFunc: func(*menu.Menu) (*models.Menu, error) {
+					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
 						return nil, errors.New("Find Error")
 					},
 				},
 				item.ServiceMock{},
 			},
 			args: args{
-				mn: &menu.Menu{
-					MenuName: "lunch_22_01_1995",
+				mn: &domain.MenuInput{
+					ID: 22,
 				},
 			},
 			want:    nil,
@@ -111,29 +92,28 @@ func TestService_AddItems(t *testing.T) {
 			name: "CheckItemExistFailed",
 			fields: fields{
 				menu.ServiceMock{
-					FindMenuFunc: func(*menu.Menu) (*models.Menu, error) {
+					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
 						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
+							ID: 22,
 						}, nil
 					},
 				},
 				item.ServiceMock{
-					CheckItemExistFunc: func(*item.Item, *menu.Menu) (bool, error) {
+					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return false, errors.New("Check Error")
 					},
 				},
 			},
 			args: args{
-				items: &item.Items{
-					ItemNames: []item.Item{
+				items: &domain.ItemInput{
+					Items: []domain.Item{
 						{
 							ItemName: "Mon 7",
 						},
 					},
 				},
-				mn: &menu.Menu{
-					MenuName: "lunch_22_01_1995",
+				mn: &domain.MenuInput{
+					ID: 22,
 				},
 			},
 			want:    nil,
@@ -143,29 +123,28 @@ func TestService_AddItems(t *testing.T) {
 			name: "ItemExists",
 			fields: fields{
 				menu.ServiceMock{
-					FindMenuFunc: func(*menu.Menu) (*models.Menu, error) {
+					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
 						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
+							ID: 22,
 						}, nil
 					},
 				},
 				item.ServiceMock{
-					CheckItemExistFunc: func(*item.Item, *menu.Menu) (bool, error) {
+					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
 				},
 			},
 			args: args{
-				items: &item.Items{
-					ItemNames: []item.Item{
+				items: &domain.ItemInput{
+					Items: []domain.Item{
 						{
 							ItemName: "Mon 7",
 						},
 					},
 				},
-				mn: &menu.Menu{
-					MenuName: "lunch_22_01_1995",
+				mn: &domain.MenuInput{
+					ID: 22,
 				},
 			},
 			want:    nil,
@@ -175,32 +154,31 @@ func TestService_AddItems(t *testing.T) {
 			name: "AddItemFailed",
 			fields: fields{
 				menu.ServiceMock{
-					FindMenuFunc: func(*menu.Menu) (*models.Menu, error) {
+					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
 						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
+							ID: 22,
 						}, nil
 					},
 				},
 				item.ServiceMock{
-					CheckItemExistFunc: func(*item.Item, *menu.Menu) (bool, error) {
+					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return false, nil
 					},
-					AddAnItemFunc: func(*item.Item) (*models.Item, error) {
+					AddFunc: func(*domain.Item) (*models.Item, error) {
 						return nil, errors.New("Add Item Failed")
 					},
 				},
 			},
 			args: args{
-				items: &item.Items{
-					ItemNames: []item.Item{
+				items: &domain.ItemInput{
+					Items: []domain.Item{
 						{
 							ItemName: "Mon 7",
 						},
 					},
 				},
-				mn: &menu.Menu{
-					MenuName: "lunch_22_01_1995",
+				mn: &domain.MenuInput{
+					ID: 22,
 				},
 			},
 			want:    nil,
@@ -211,8 +189,10 @@ func TestService_AddItems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				Menu: &tt.fields.Menu,
-				Item: &tt.fields.Item,
+				Store{
+					Menu: &tt.fields.Menu,
+					Item: &tt.fields.Item,
+				},
 			}
 			got, err := s.AddItems(tt.args.items, tt.args.mn)
 			if (err != nil) != tt.wantErr {

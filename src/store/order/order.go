@@ -12,17 +12,17 @@ import (
 	"git.d.foundation/datcom/backend/src/domain"
 )
 
-type OrderService struct {
+type orderService struct {
 	db *sql.DB
 }
 
 func NewService(db *sql.DB) Service {
-	return &OrderService{
+	return &orderService{
 		db: db,
 	}
 }
 
-func (os *OrderService) Add(o *domain.OrderInput) (*models.Order, error) {
+func (os *orderService) Add(o *domain.OrderInput) (*models.Order, error) {
 	order := &models.Order{
 		UserID: o.UserID,
 		ItemID: o.ItemID,
@@ -36,7 +36,7 @@ func (os *OrderService) Add(o *domain.OrderInput) (*models.Order, error) {
 	return order, err
 }
 
-func (os *OrderService) Delete(o *domain.OrderInput) error {
+func (os *orderService) Delete(o *domain.OrderInput) error {
 	order, err := models.Orders(qm.Where("user_id=? and item_id=?", o.UserID, o.ItemID)).One(context.Background(), os.db)
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (os *OrderService) Delete(o *domain.OrderInput) error {
 	return err
 }
 
-func (os *OrderService) Exist(o *domain.OrderInput) (bool, error) {
+func (os *orderService) Exist(o *domain.OrderInput) (bool, error) {
 	b, err := models.Orders(qm.Where("user_id=? and item_id=?", o.UserID, o.ItemID)).Exists(context.Background(), os.db)
 	if err != nil {
 		return false, err
@@ -55,7 +55,7 @@ func (os *OrderService) Exist(o *domain.OrderInput) (bool, error) {
 	return b, nil
 }
 
-func (os *OrderService) Get(userID int) ([]*domain.Item, error) {
+func (os *orderService) Get(userID int) ([]*domain.Item, error) {
 	orders, err := models.Orders(qm.Where("user_id=?", userID)).All(context.Background(), os.db)
 	if err != nil {
 		return nil, err

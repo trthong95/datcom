@@ -5,12 +5,13 @@ package menu
 
 import (
 	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/domain"
 	"sync"
 )
 
 var (
 	lockServiceMockCheckMenuExist sync.RWMutex
-	lockServiceMockFindMenu       sync.RWMutex
+	lockServiceMockFindByID       sync.RWMutex
 )
 
 // Ensure, that ServiceMock does implement Service.
@@ -26,8 +27,8 @@ var _ Service = &ServiceMock{}
 //             CheckMenuExistFunc: func(menuID int) (bool, error) {
 // 	               panic("mock out the CheckMenuExist method")
 //             },
-//             FindMenuFunc: func(m *Menu) (*models.Menu, error) {
-// 	               panic("mock out the FindMenu method")
+//             FindByIDFunc: func(mn *domain.MenuInput) (*models.Menu, error) {
+// 	               panic("mock out the FindByID method")
 //             },
 //         }
 //
@@ -39,8 +40,8 @@ type ServiceMock struct {
 	// CheckMenuExistFunc mocks the CheckMenuExist method.
 	CheckMenuExistFunc func(menuID int) (bool, error)
 
-	// FindMenuFunc mocks the FindMenu method.
-	FindMenuFunc func(m *Menu) (*models.Menu, error)
+	// FindByIDFunc mocks the FindByID method.
+	FindByIDFunc func(mn *domain.MenuInput) (*models.Menu, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -49,10 +50,10 @@ type ServiceMock struct {
 			// MenuID is the menuID argument value.
 			MenuID int
 		}
-		// FindMenu holds details about calls to the FindMenu method.
-		FindMenu []struct {
-			// M is the m argument value.
-			M *Menu
+		// FindByID holds details about calls to the FindByID method.
+		FindByID []struct {
+			// Mn is the mn argument value.
+			Mn *domain.MenuInput
 		}
 	}
 }
@@ -88,33 +89,33 @@ func (mock *ServiceMock) CheckMenuExistCalls() []struct {
 	return calls
 }
 
-// FindMenu calls FindMenuFunc.
-func (mock *ServiceMock) FindMenu(m *Menu) (*models.Menu, error) {
-	if mock.FindMenuFunc == nil {
-		panic("ServiceMock.FindMenuFunc: method is nil but Service.FindMenu was just called")
+// FindByID calls FindByIDFunc.
+func (mock *ServiceMock) FindByID(mn *domain.MenuInput) (*models.Menu, error) {
+	if mock.FindByIDFunc == nil {
+		panic("ServiceMock.FindByIDFunc: method is nil but Service.FindByID was just called")
 	}
 	callInfo := struct {
-		M *Menu
+		Mn *domain.MenuInput
 	}{
-		M: m,
+		Mn: mn,
 	}
-	lockServiceMockFindMenu.Lock()
-	mock.calls.FindMenu = append(mock.calls.FindMenu, callInfo)
-	lockServiceMockFindMenu.Unlock()
-	return mock.FindMenuFunc(m)
+	lockServiceMockFindByID.Lock()
+	mock.calls.FindByID = append(mock.calls.FindByID, callInfo)
+	lockServiceMockFindByID.Unlock()
+	return mock.FindByIDFunc(mn)
 }
 
-// FindMenuCalls gets all the calls that were made to FindMenu.
+// FindByIDCalls gets all the calls that were made to FindByID.
 // Check the length with:
-//     len(mockedService.FindMenuCalls())
-func (mock *ServiceMock) FindMenuCalls() []struct {
-	M *Menu
+//     len(mockedService.FindByIDCalls())
+func (mock *ServiceMock) FindByIDCalls() []struct {
+	Mn *domain.MenuInput
 } {
 	var calls []struct {
-		M *Menu
+		Mn *domain.MenuInput
 	}
-	lockServiceMockFindMenu.RLock()
-	calls = mock.calls.FindMenu
-	lockServiceMockFindMenu.RUnlock()
+	lockServiceMockFindByID.RLock()
+	calls = mock.calls.FindByID
+	lockServiceMockFindByID.RUnlock()
 	return calls
 }

@@ -4,17 +4,16 @@
 package order
 
 import (
-	"sync"
-
 	"git.d.foundation/datcom/backend/models"
 	"git.d.foundation/datcom/backend/src/domain"
+	"sync"
 )
 
 var (
 	lockServiceMockAdd                     sync.RWMutex
 	lockServiceMockCheckOrderExistByItemID sync.RWMutex
 	lockServiceMockDelete                  sync.RWMutex
-	lockServiceMockDeleteByID              sync.RWMutex
+	lockServiceMockDeleteO                 sync.RWMutex
 	lockServiceMockExist                   sync.RWMutex
 	lockServiceMockGet                     sync.RWMutex
 	lockServiceMockGetAllOrdersByItemID    sync.RWMutex
@@ -33,15 +32,17 @@ var _ Service = &ServiceMock{}
 //             AddFunc: func(o *domain.OrderInput) (*models.Order, error) {
 // 	               panic("mock out the Add method")
 //             },
-//             DeleteFunc: func(o *domain.OrderInput) error {
-// 	               panic("mock out the Delete method")
-//             },
-//             ExistFunc: func(o *domain.OrderInput) (bool, error) {
 //             CheckOrderExistByItemIDFunc: func(ItemID int) (bool, error) {
 // 	               panic("mock out the CheckOrderExistByItemID method")
 //             },
-//             DeleteByIDFunc: func(in1 *models.Order) (*models.Order, error) {
-// 	               panic("mock out the DeleteByID method")
+//             DeleteFunc: func(o *domain.OrderInput) error {
+// 	               panic("mock out the Delete method")
+//             },
+//             DeleteOFunc: func(o *models.Order) error {
+// 	               panic("mock out the DeleteO method")
+//             },
+//             ExistFunc: func(o *domain.OrderInput) (bool, error) {
+// 	               panic("mock out the Exist method")
 //             },
 //             GetFunc: func(userID int) ([]*domain.Item, error) {
 // 	               panic("mock out the Get method")
@@ -65,8 +66,8 @@ type ServiceMock struct {
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(o *domain.OrderInput) error
 
-	// DeleteByIDFunc mocks the DeleteByID method.
-	DeleteByIDFunc func(in1 *models.Order) (*models.Order, error)
+	// DeleteOFunc mocks the DeleteO method.
+	DeleteOFunc func(o *models.Order) error
 
 	// ExistFunc mocks the Exist method.
 	ExistFunc func(o *domain.OrderInput) (bool, error)
@@ -94,10 +95,10 @@ type ServiceMock struct {
 			// O is the o argument value.
 			O *domain.OrderInput
 		}
-		// DeleteByID holds details about calls to the DeleteByID method.
-		DeleteByID []struct {
-			// In1 is the in1 argument value.
-			In1 *models.Order
+		// DeleteO holds details about calls to the DeleteO method.
+		DeleteO []struct {
+			// O is the o argument value.
+			O *models.Order
 		}
 		// Exist holds details about calls to the Exist method.
 		Exist []struct {
@@ -210,34 +211,34 @@ func (mock *ServiceMock) DeleteCalls() []struct {
 	return calls
 }
 
-// DeleteByID calls DeleteByIDFunc.
-func (mock *ServiceMock) DeleteByID(in1 *models.Order) (*models.Order, error) {
-	if mock.DeleteByIDFunc == nil {
-		panic("ServiceMock.DeleteByIDFunc: method is nil but Service.DeleteByID was just called")
+// DeleteO calls DeleteOFunc.
+func (mock *ServiceMock) DeleteO(o *models.Order) error {
+	if mock.DeleteOFunc == nil {
+		panic("ServiceMock.DeleteOFunc: method is nil but Service.DeleteO was just called")
 	}
 	callInfo := struct {
-		In1 *models.Order
+		O *models.Order
 	}{
-		In1: in1,
+		O: o,
 	}
-	lockServiceMockDeleteByID.Lock()
-	mock.calls.DeleteByID = append(mock.calls.DeleteByID, callInfo)
-	lockServiceMockDeleteByID.Unlock()
-	return mock.DeleteByIDFunc(in1)
+	lockServiceMockDeleteO.Lock()
+	mock.calls.DeleteO = append(mock.calls.DeleteO, callInfo)
+	lockServiceMockDeleteO.Unlock()
+	return mock.DeleteOFunc(o)
 }
 
-// DeleteByIDCalls gets all the calls that were made to DeleteByID.
+// DeleteOCalls gets all the calls that were made to DeleteO.
 // Check the length with:
-//     len(mockedService.DeleteByIDCalls())
-func (mock *ServiceMock) DeleteByIDCalls() []struct {
-	In1 *models.Order
+//     len(mockedService.DeleteOCalls())
+func (mock *ServiceMock) DeleteOCalls() []struct {
+	O *models.Order
 } {
 	var calls []struct {
-		In1 *models.Order
+		O *models.Order
 	}
-	lockServiceMockDeleteByID.RLock()
-	calls = mock.calls.DeleteByID
-	lockServiceMockDeleteByID.RUnlock()
+	lockServiceMockDeleteO.RLock()
+	calls = mock.calls.DeleteO
+	lockServiceMockDeleteO.RUnlock()
 	return calls
 }
 

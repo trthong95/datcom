@@ -34,19 +34,19 @@ func (s *itemService) Add(i *domain.Item) (*models.Item, error) {
 	return item, item.Insert(context.Background(), s.db, boil.Infer())
 }
 
-func (s *itemService) CheckItemExist(i *domain.Item) (bool, error) {
-	item := mapItemInputToModel(i)
-	return models.Items(
-		qm.Where("(item_name = ? AND menu_id = ?) OR (id = ? AND menu_id = ?)", item.ItemName, item.MenuID, item.ID, item.MenuID),
-	).Exists(context.Background(), s.db)
+func (s *itemService) FindByID(it *domain.Item) (*models.Item, error) {
+	i := mapItemInputToModel(it)
+	return models.FindItem(context.Background(), s.db, i.ID)
 }
 
-func (s *itemService) FindAnItem(i *Item) (*models.Item, error) {
-	it, err := models.FindItem(context.Background(), s.db, i.ID)
-	return it, err
-}
-
-func (s *itemService) DeleteAnItem(i *models.Item) (*models.Item, error) {
+func (s *itemService) Delete(i *models.Item) error {
 	_, err := i.Delete(context.Background(), s.db)
-	return i, err
+	return err
+}
+
+func (s *itemService) CheckItemExist(it *domain.Item) (bool, error) {
+	i := mapItemInputToModel(it)
+	return models.Items(
+		qm.Where("(item_name = ? AND menu_id = ?) OR (id = ? AND menu_id = ?)", i.ItemName, i.MenuID, i.ID, i.MenuID),
+	).Exists(context.Background(), s.db)
 }

@@ -25,10 +25,10 @@ var _ Service = &ServiceMock{}
 //
 //         // make and configure a mocked Service
 //         mockedService := &ServiceMock{
-//             CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
+//             CreateFunc: func(p *domain.UserInput) (*models.User, error) {
 // 	               panic("mock out the Create method")
 //             },
-//             FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
+//             FindFunc: func(p *domain.UserInput) (*models.User, error) {
 // 	               panic("mock out the Find method")
 //             },
 //             FindAllFunc: func() ([]*models.User, error) {
@@ -42,10 +42,10 @@ var _ Service = &ServiceMock{}
 //     }
 type ServiceMock struct {
 	// CreateFunc mocks the Create method.
-	CreateFunc func(p *domain.PersonInfo) (*models.User, error)
+	CreateFunc func(p *domain.UserInput) (*models.User, error)
 
 	// FindFunc mocks the Find method.
-	FindFunc func(p *domain.PersonInfo) (*models.User, error)
+	FindFunc func(p *domain.UserInput) (*models.User, error)
 
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func() ([]*models.User, error)
@@ -55,12 +55,12 @@ type ServiceMock struct {
 		// Create holds details about calls to the Create method.
 		Create []struct {
 			// P is the p argument value.
-			P *domain.PersonInfo
+			P *domain.UserInput
 		}
 		// Find holds details about calls to the Find method.
 		Find []struct {
 			// P is the p argument value.
-			P *domain.PersonInfo
+			P *domain.UserInput
 		}
 		// FindAll holds details about calls to the FindAll method.
 		FindAll []struct {
@@ -69,12 +69,12 @@ type ServiceMock struct {
 }
 
 // Create calls CreateFunc.
-func (mock *ServiceMock) Create(p *domain.PersonInfo) (*models.User, error) {
+func (mock *ServiceMock) Create(p *domain.UserInput) (*models.User, error) {
 	if mock.CreateFunc == nil {
 		panic("ServiceMock.CreateFunc: method is nil but Service.Create was just called")
 	}
 	callInfo := struct {
-		P *domain.PersonInfo
+		P *domain.UserInput
 	}{
 		P: p,
 	}
@@ -88,10 +88,10 @@ func (mock *ServiceMock) Create(p *domain.PersonInfo) (*models.User, error) {
 // Check the length with:
 //     len(mockedService.CreateCalls())
 func (mock *ServiceMock) CreateCalls() []struct {
-	P *domain.PersonInfo
+	P *domain.UserInput
 } {
 	var calls []struct {
-		P *domain.PersonInfo
+		P *domain.UserInput
 	}
 	lockServiceMockCreate.RLock()
 	calls = mock.calls.Create
@@ -100,12 +100,12 @@ func (mock *ServiceMock) CreateCalls() []struct {
 }
 
 // Find calls FindFunc.
-func (mock *ServiceMock) Find(p *domain.PersonInfo) (*models.User, error) {
+func (mock *ServiceMock) Find(p *domain.UserInput) (*models.User, error) {
 	if mock.FindFunc == nil {
 		panic("ServiceMock.FindFunc: method is nil but Service.Find was just called")
 	}
 	callInfo := struct {
-		P *domain.PersonInfo
+		P *domain.UserInput
 	}{
 		P: p,
 	}
@@ -119,10 +119,10 @@ func (mock *ServiceMock) Find(p *domain.PersonInfo) (*models.User, error) {
 // Check the length with:
 //     len(mockedService.FindCalls())
 func (mock *ServiceMock) FindCalls() []struct {
-	P *domain.PersonInfo
+	P *domain.UserInput
 } {
 	var calls []struct {
-		P *domain.PersonInfo
+		P *domain.UserInput
 	}
 	lockServiceMockFind.RLock()
 	calls = mock.calls.Find

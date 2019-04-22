@@ -22,7 +22,7 @@ func NewService(db *sql.DB) Service {
 	}
 }
 
-func (us *userService) Create(p *domain.PersonInfo) (*models.User, error) {
+func (us *userService) Create(p *domain.UserInput) (*models.User, error) {
 	u := &models.User{Name: p.Name, Email: p.Email, Token: p.Token}
 	err := u.Insert(context.Background(), us.db, boil.Infer())
 	if err != nil {
@@ -31,7 +31,7 @@ func (us *userService) Create(p *domain.PersonInfo) (*models.User, error) {
 	return us.Find(p)
 }
 
-func (us *userService) Find(p *domain.PersonInfo) (*models.User, error) {
+func (us *userService) Find(p *domain.UserInput) (*models.User, error) {
 	user, err := models.Users(qm.Where("email=?", p.Email)).One(context.Background(), us.db)
 	return user, err
 }

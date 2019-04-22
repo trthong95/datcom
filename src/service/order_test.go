@@ -55,7 +55,9 @@ func TestService_AddOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				Order: &tt.fields.Order,
+				Store: Store{
+					Order: &tt.fields.Order,
+				},
 			}
 			if _, err := s.AddOrder(tt.args.o); (err != nil) != tt.wantErr {
 				t.Errorf("Service.AddOrder() error = %v, wantErr %v", err, tt.wantErr)
@@ -107,7 +109,9 @@ func TestService_DeleteOrder(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				Order: &tt.fields.Order,
+				Store: Store{
+					Order: &tt.fields.Order,
+				},
 			}
 			if err := s.DeleteOrder(tt.args.o); (err != nil) != tt.wantErr {
 				t.Errorf("Service.DeleteOrder() error = %v, wantErr %v", err, tt.wantErr)
@@ -157,7 +161,9 @@ func TestService_GetOrdersByUserID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				Order: &tt.fields.Order,
+				Store: Store{
+					Order: &tt.fields.Order,
+				},
 			}
 			got, err := s.GetOrdersByUserID(tt.args.userID)
 			if (err != nil) != tt.wantErr {

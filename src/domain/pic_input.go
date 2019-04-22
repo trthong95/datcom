@@ -1,6 +1,6 @@
 package domain
 
-type PeopleInCharge struct {
+type PICInput struct {
 	UserID int
 	MenuID int
 }

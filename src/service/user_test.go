@@ -75,7 +75,9 @@ func TestService_GetAllUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				User: &tt.fields.User,
+				Store: Store{
+					User: &tt.fields.User,
+				},
 			}
 			got, err := s.GetAllUser()
 			if (err != nil) != tt.wantErr {
@@ -94,7 +96,7 @@ func TestService_CreateUser(t *testing.T) {
 		User user.ServiceMock
 	}
 	type args struct {
-		p *domain.PersonInfo
+		p *domain.UserInput
 	}
 	tests := []struct {
 		name    string
@@ -108,7 +110,7 @@ func TestService_CreateUser(t *testing.T) {
 			name: "Pass",
 			fields: fields{
 				user.ServiceMock{
-					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					CreateFunc: func(p *domain.UserInput) (*models.User, error) {
 						return &models.User{
 							ID:    100,
 							Name:  "Demo1",
@@ -116,13 +118,13 @@ func TestService_CreateUser(t *testing.T) {
 							Token: "ABCD",
 						}, nil
 					},
-					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					FindFunc: func(p *domain.UserInput) (*models.User, error) {
 						return nil, nil
 					},
 				},
 			},
 			args: args{
-				&domain.PersonInfo{
+				&domain.UserInput{
 					Name:  "Demo1",
 					Email: "Demo1@email.com",
 					Token: "ABCD",
@@ -140,10 +142,10 @@ func TestService_CreateUser(t *testing.T) {
 			name: "Duplicate",
 			fields: fields{
 				user.ServiceMock{
-					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					CreateFunc: func(p *domain.UserInput) (*models.User, error) {
 						return nil, nil
 					},
-					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					FindFunc: func(p *domain.UserInput) (*models.User, error) {
 						return &models.User{
 							ID:    100,
 							Name:  "Demo2",
@@ -154,7 +156,7 @@ func TestService_CreateUser(t *testing.T) {
 				},
 			},
 			args: args{
-				&domain.PersonInfo{
+				&domain.UserInput{
 					Name:  "Demo2",
 					Email: "Demo2@email.com",
 					Token: "ABCD",
@@ -167,16 +169,16 @@ func TestService_CreateUser(t *testing.T) {
 			name: "Find Error",
 			fields: fields{
 				user.ServiceMock{
-					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					CreateFunc: func(p *domain.UserInput) (*models.User, error) {
 						return nil, errors.New("Find errors")
 					},
-					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					FindFunc: func(p *domain.UserInput) (*models.User, error) {
 						return nil, errors.New("Find errors")
 					},
 				},
 			},
 			args: args{
-				&domain.PersonInfo{
+				&domain.UserInput{
 					Name:  "Demo3",
 					Email: "Demo3@gmail.com",
 					Token: "ABCD",
@@ -189,16 +191,16 @@ func TestService_CreateUser(t *testing.T) {
 			name: "Invalid email format",
 			fields: fields{
 				user.ServiceMock{
-					CreateFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					CreateFunc: func(p *domain.UserInput) (*models.User, error) {
 						return &models.User{}, nil
 					},
-					FindFunc: func(p *domain.PersonInfo) (*models.User, error) {
+					FindFunc: func(p *domain.UserInput) (*models.User, error) {
 						return &models.User{}, nil
 					},
 				},
 			},
 			args: args{
-				&domain.PersonInfo{
+				&domain.UserInput{
 					Name:  "Demo4",
 					Email: "Demo2invalidemail",
 					Token: "ABCD",
@@ -211,7 +213,9 @@ func TestService_CreateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				User: &tt.fields.User,
+				Store: Store{
+					User: &tt.fields.User,
+				},
 			}
 			got, err := s.CreateUser(tt.args.p)
 			if (err != nil) != tt.wantErr {

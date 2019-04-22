@@ -1,8 +1,8 @@
-package item
+package domain
 
-// Items ..
-type Items struct {
-	ItemNames []Item
+// ItemInput ..
+type ItemInput struct {
+	Items []Item
 }
 
 // Item ..

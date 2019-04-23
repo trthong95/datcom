@@ -35,7 +35,7 @@ var _ Service = &ServiceMock{}
 //             DeleteFunc: func(i *models.Item) error {
 // 	               panic("mock out the Delete method")
 //             },
-//             FindByIDFunc: func(in1 *domain.Item) (*models.Item, error) {
+//             FindByIDFunc: func(itemID int) (*models.Item, error) {
 // 	               panic("mock out the FindByID method")
 //             },
 //         }
@@ -55,7 +55,7 @@ type ServiceMock struct {
 	DeleteFunc func(i *models.Item) error
 
 	// FindByIDFunc mocks the FindByID method.
-	FindByIDFunc func(in1 *domain.Item) (*models.Item, error)
+	FindByIDFunc func(itemID int) (*models.Item, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -76,8 +76,8 @@ type ServiceMock struct {
 		}
 		// FindByID holds details about calls to the FindByID method.
 		FindByID []struct {
-			// In1 is the in1 argument value.
-			In1 *domain.Item
+			// ItemID is the itemID argument value.
+			ItemID int
 		}
 	}
 }
@@ -176,29 +176,29 @@ func (mock *ServiceMock) DeleteCalls() []struct {
 }
 
 // FindByID calls FindByIDFunc.
-func (mock *ServiceMock) FindByID(in1 *domain.Item) (*models.Item, error) {
+func (mock *ServiceMock) FindByID(itemID int) (*models.Item, error) {
 	if mock.FindByIDFunc == nil {
 		panic("ServiceMock.FindByIDFunc: method is nil but Service.FindByID was just called")
 	}
 	callInfo := struct {
-		In1 *domain.Item
+		ItemID int
 	}{
-		In1: in1,
+		ItemID: itemID,
 	}
 	lockServiceMockFindByID.Lock()
 	mock.calls.FindByID = append(mock.calls.FindByID, callInfo)
 	lockServiceMockFindByID.Unlock()
-	return mock.FindByIDFunc(in1)
+	return mock.FindByIDFunc(itemID)
 }
 
 // FindByIDCalls gets all the calls that were made to FindByID.
 // Check the length with:
 //     len(mockedService.FindByIDCalls())
 func (mock *ServiceMock) FindByIDCalls() []struct {
-	In1 *domain.Item
+	ItemID int
 } {
 	var calls []struct {
-		In1 *domain.Item
+		ItemID int
 	}
 	lockServiceMockFindByID.RLock()
 	calls = mock.calls.FindByID

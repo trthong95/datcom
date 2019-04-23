@@ -8,14 +8,9 @@ import (
 )
 
 // DeleteItem ..
-func (s *Service) DeleteItem(i *domain.Item, mn *domain.MenuInput) (*models.Item, error) {
+func (s *Service) DeleteItem(i *domain.Item) (*models.Item, error) {
 
-	m, err := s.Store.Menu.FindByID(&domain.MenuInput{ID: mn.ID})
-	if err != nil {
-		return nil, err
-	}
-
-	exists, err := s.Store.Item.CheckItemExist(&domain.Item{ID: i.ID, MenuID: m.ID})
+	exists, err := s.Store.Item.CheckItemExist(&domain.Item{ID: i.ID, MenuID: i.MenuID})
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +18,7 @@ func (s *Service) DeleteItem(i *domain.Item, mn *domain.MenuInput) (*models.Item
 		return nil, errors.New("Item does not exist")
 	}
 
-	it, err := s.Store.Item.FindByID(&domain.Item{ID: i.ID})
+	it, err := s.Store.Item.FindByID(i.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +33,7 @@ func (s *Service) DeleteItem(i *domain.Item, mn *domain.MenuInput) (*models.Item
 			return nil, err
 		}
 		for _, o := range orders {
-			err := s.Store.Order.DeleteO(o)
+			err := s.Store.Order.DeleteOrder(o)
 			if err != nil {
 				return nil, err
 			}

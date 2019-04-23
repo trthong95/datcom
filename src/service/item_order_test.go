@@ -8,19 +8,16 @@ import (
 	"git.d.foundation/datcom/backend/models"
 	"git.d.foundation/datcom/backend/src/domain"
 	"git.d.foundation/datcom/backend/src/store/item"
-	"git.d.foundation/datcom/backend/src/store/menu"
 	"git.d.foundation/datcom/backend/src/store/order"
 )
 
 func TestService_DeleteItem(t *testing.T) {
 	type fields struct {
-		Menu  menu.ServiceMock
 		Item  item.ServiceMock
 		Order order.ServiceMock
 	}
 	type args struct {
-		i  *domain.Item
-		mn *domain.MenuInput
+		i *domain.Item
 	}
 	tests := []struct {
 		name    string
@@ -33,19 +30,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "PassNoOrder",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return &models.Item{
 							ID:       7,
 							ItemName: "Mon 7",
@@ -63,7 +52,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -72,9 +61,6 @@ func TestService_DeleteItem(t *testing.T) {
 				i: &domain.Item{
 					ItemName: "Mon 7",
 					MenuID:   22,
-				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
 				},
 			},
 			want: &models.Item{
@@ -87,19 +73,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "PassWithOrders",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return &models.Item{
 							ID:       7,
 							ItemName: "Mon 7",
@@ -122,7 +100,7 @@ func TestService_DeleteItem(t *testing.T) {
 							},
 						}, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -131,9 +109,6 @@ func TestService_DeleteItem(t *testing.T) {
 				i: &domain.Item{
 					ItemName: "Mon 7",
 					MenuID:   22,
-				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
 				},
 			},
 			want: &models.Item{
@@ -144,64 +119,13 @@ func TestService_DeleteItem(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "FindMenuError",
-			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return nil, errors.New("FindMenuError")
-					},
-				},
-				item.ServiceMock{
-					CheckItemExistFunc: func(*domain.Item) (bool, error) {
-						return true, nil
-					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
-						return nil, nil
-					},
-					DeleteFunc: func(i *models.Item) error {
-						return nil
-					},
-				},
-				order.ServiceMock{
-					CheckOrderExistByItemIDFunc: func(ItemID int) (bool, error) {
-						return false, nil
-					},
-					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
-						return nil, nil
-					},
-					DeleteOFunc: func(o *models.Order) error {
-						return nil
-					},
-				},
-			},
-			args: args{
-				i: &domain.Item{
-					ItemName: "Mon 7",
-					MenuID:   22,
-				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
-			},
-			want:    nil,
-			wantErr: true,
-		},
-		{
 			name: "NoItem",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return false, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, errors.New("Item does not exist")
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -215,7 +139,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -225,9 +149,6 @@ func TestService_DeleteItem(t *testing.T) {
 					ItemName: "Mon 7",
 					MenuID:   22,
 				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
 			},
 			want:    nil,
 			wantErr: true,
@@ -235,19 +156,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "CheckItemError",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return false, errors.New("Check Item Error")
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, nil
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -261,7 +174,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -271,9 +184,6 @@ func TestService_DeleteItem(t *testing.T) {
 					ItemName: "Mon 7",
 					MenuID:   22,
 				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
 			},
 			want:    nil,
 			wantErr: true,
@@ -281,19 +191,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "Find Item Error",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, errors.New("Find Item Error")
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -307,7 +209,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -317,9 +219,6 @@ func TestService_DeleteItem(t *testing.T) {
 					ItemName: "Mon 7",
 					MenuID:   22,
 				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
 			},
 			want:    nil,
 			wantErr: true,
@@ -327,19 +226,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "Delete Item Error",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, nil
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -353,7 +244,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -363,9 +254,6 @@ func TestService_DeleteItem(t *testing.T) {
 					ItemName: "Mon 7",
 					MenuID:   22,
 				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
 			},
 			want:    nil,
 			wantErr: true,
@@ -373,19 +261,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "Check Order Error",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, nil
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -399,7 +279,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -409,9 +289,6 @@ func TestService_DeleteItem(t *testing.T) {
 					ItemName: "Mon 7",
 					MenuID:   22,
 				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
 			},
 			want:    nil,
 			wantErr: true,
@@ -419,19 +296,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "Get Orders Error",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, nil
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -445,7 +314,7 @@ func TestService_DeleteItem(t *testing.T) {
 					GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
 						return nil, errors.New("Get Orders Error")
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return nil
 					},
 				},
@@ -455,9 +324,6 @@ func TestService_DeleteItem(t *testing.T) {
 					ItemName: "Mon 7",
 					MenuID:   22,
 				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
-				},
 			},
 			want:    nil,
 			wantErr: true,
@@ -465,19 +331,11 @@ func TestService_DeleteItem(t *testing.T) {
 		{
 			name: "Delete Order Error",
 			fields: fields{
-				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID:       22,
-							MenuName: "lunch_22_01_1995",
-						}, nil
-					},
-				},
 				item.ServiceMock{
 					CheckItemExistFunc: func(*domain.Item) (bool, error) {
 						return true, nil
 					},
-					FindByIDFunc: func(i *domain.Item) (*models.Item, error) {
+					FindByIDFunc: func(itemID int) (*models.Item, error) {
 						return nil, nil
 					},
 					DeleteFunc: func(i *models.Item) error {
@@ -496,7 +354,7 @@ func TestService_DeleteItem(t *testing.T) {
 							},
 						}, nil
 					},
-					DeleteOFunc: func(o *models.Order) error {
+					DeleteOrderFunc: func(o *models.Order) error {
 						return errors.New("Delete Order Error")
 					},
 				},
@@ -505,9 +363,6 @@ func TestService_DeleteItem(t *testing.T) {
 				i: &domain.Item{
 					ItemName: "Mon 7",
 					MenuID:   22,
-				},
-				mn: &domain.MenuInput{
-					MenuName: "lunch_22_01_1995",
 				},
 			},
 			want:    nil,
@@ -518,12 +373,11 @@ func TestService_DeleteItem(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
 				Store: Store{
-					Menu:  &tt.fields.Menu,
 					Item:  &tt.fields.Item,
 					Order: &tt.fields.Order,
 				},
 			}
-			got, err := s.DeleteItem(tt.args.i, tt.args.mn)
+			got, err := s.DeleteItem(tt.args.i)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Service.DeleteItem() error = %v, wantErr %v", err, tt.wantErr)
 				return

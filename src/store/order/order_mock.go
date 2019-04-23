@@ -13,7 +13,7 @@ var (
 	lockServiceMockAdd                     sync.RWMutex
 	lockServiceMockCheckOrderExistByItemID sync.RWMutex
 	lockServiceMockDelete                  sync.RWMutex
-	lockServiceMockDeleteO                 sync.RWMutex
+	lockServiceMockDeleteOrder             sync.RWMutex
 	lockServiceMockExist                   sync.RWMutex
 	lockServiceMockGet                     sync.RWMutex
 	lockServiceMockGetAllOrdersByItemID    sync.RWMutex
@@ -38,8 +38,8 @@ var _ Service = &ServiceMock{}
 //             DeleteFunc: func(o *domain.OrderInput) error {
 // 	               panic("mock out the Delete method")
 //             },
-//             DeleteOFunc: func(o *models.Order) error {
-// 	               panic("mock out the DeleteO method")
+//             DeleteOrderFunc: func(o *models.Order) error {
+// 	               panic("mock out the DeleteOrder method")
 //             },
 //             ExistFunc: func(o *domain.OrderInput) (bool, error) {
 // 	               panic("mock out the Exist method")
@@ -66,8 +66,8 @@ type ServiceMock struct {
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(o *domain.OrderInput) error
 
-	// DeleteOFunc mocks the DeleteO method.
-	DeleteOFunc func(o *models.Order) error
+	// DeleteOrderFunc mocks the DeleteOrder method.
+	DeleteOrderFunc func(o *models.Order) error
 
 	// ExistFunc mocks the Exist method.
 	ExistFunc func(o *domain.OrderInput) (bool, error)
@@ -95,8 +95,8 @@ type ServiceMock struct {
 			// O is the o argument value.
 			O *domain.OrderInput
 		}
-		// DeleteO holds details about calls to the DeleteO method.
-		DeleteO []struct {
+		// DeleteOrder holds details about calls to the DeleteOrder method.
+		DeleteOrder []struct {
 			// O is the o argument value.
 			O *models.Order
 		}
@@ -211,34 +211,34 @@ func (mock *ServiceMock) DeleteCalls() []struct {
 	return calls
 }
 
-// DeleteO calls DeleteOFunc.
-func (mock *ServiceMock) DeleteO(o *models.Order) error {
-	if mock.DeleteOFunc == nil {
-		panic("ServiceMock.DeleteOFunc: method is nil but Service.DeleteO was just called")
+// DeleteOrder calls DeleteOrderFunc.
+func (mock *ServiceMock) DeleteOrder(o *models.Order) error {
+	if mock.DeleteOrderFunc == nil {
+		panic("ServiceMock.DeleteOrderFunc: method is nil but Service.DeleteOrder was just called")
 	}
 	callInfo := struct {
 		O *models.Order
 	}{
 		O: o,
 	}
-	lockServiceMockDeleteO.Lock()
-	mock.calls.DeleteO = append(mock.calls.DeleteO, callInfo)
-	lockServiceMockDeleteO.Unlock()
-	return mock.DeleteOFunc(o)
+	lockServiceMockDeleteOrder.Lock()
+	mock.calls.DeleteOrder = append(mock.calls.DeleteOrder, callInfo)
+	lockServiceMockDeleteOrder.Unlock()
+	return mock.DeleteOrderFunc(o)
 }
 
-// DeleteOCalls gets all the calls that were made to DeleteO.
+// DeleteOrderCalls gets all the calls that were made to DeleteOrder.
 // Check the length with:
-//     len(mockedService.DeleteOCalls())
-func (mock *ServiceMock) DeleteOCalls() []struct {
+//     len(mockedService.DeleteOrderCalls())
+func (mock *ServiceMock) DeleteOrderCalls() []struct {
 	O *models.Order
 } {
 	var calls []struct {
 		O *models.Order
 	}
-	lockServiceMockDeleteO.RLock()
-	calls = mock.calls.DeleteO
-	lockServiceMockDeleteO.RUnlock()
+	lockServiceMockDeleteOrder.RLock()
+	calls = mock.calls.DeleteOrder
+	lockServiceMockDeleteOrder.RUnlock()
 	return calls
 }
 

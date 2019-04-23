@@ -34,9 +34,8 @@ func (s *itemService) Add(i *domain.Item) (*models.Item, error) {
 	return item, item.Insert(context.Background(), s.db, boil.Infer())
 }
 
-func (s *itemService) FindByID(it *domain.Item) (*models.Item, error) {
-	i := mapItemInputToModel(it)
-	return models.FindItem(context.Background(), s.db, i.ID)
+func (s *itemService) FindByID(itemID int) (*models.Item, error) {
+	return models.FindItem(context.Background(), s.db, itemID)
 }
 
 func (s *itemService) Delete(i *models.Item) error {

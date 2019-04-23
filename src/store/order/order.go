@@ -76,8 +76,8 @@ func (os *orderService) Get(userID int) ([]*domain.Item, error) {
 	return returnItems, err
 }
 
-// DeleteO ..
-func (s *orderService) DeleteO(o *models.Order) error {
+// DeleteOrder ..
+func (s *orderService) DeleteOrder(o *models.Order) error {
 	_, err := o.Delete(context.Background(), s.db)
 	return err
 }

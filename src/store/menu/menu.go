@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/volatiletech/sqlboiler/queries/qm"
+
 	"git.d.foundation/datcom/backend/models"
 	"git.d.foundation/datcom/backend/src/domain"
 )
@@ -30,7 +32,8 @@ func mapMenuInputToModel(mn *domain.MenuInput) *models.Menu {
 	}
 }
 
-func (s *menuService) FindByID(mn *domain.MenuInput) (*models.Menu, error) {
-	m := mapMenuInputToModel(mn)
-	return models.FindMenu(context.Background(), s.db, m.ID)
+func (s *menuService) CheckMenuExist(menuID int) (bool, error) {
+	return models.Menus(
+		qm.Where("id = ?", menuID),
+	).Exists(context.Background(), s.db)
 }

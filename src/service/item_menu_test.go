@@ -17,8 +17,8 @@ func TestService_AddItems(t *testing.T) {
 		Item item.ServiceMock
 	}
 	type args struct {
-		items *domain.ItemInput
-		mn    *domain.MenuInput
+		items  *domain.ItemInput
+		menuID int
 	}
 	tests := []struct {
 		name    string
@@ -32,10 +32,8 @@ func TestService_AddItems(t *testing.T) {
 			name: "Pass",
 			fields: fields{
 				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID: 22,
-						}, nil
+					CheckMenuExistFunc: func(menuID int) (bool, error) {
+						return true, nil
 					},
 				},
 				item.ServiceMock{
@@ -58,9 +56,7 @@ func TestService_AddItems(t *testing.T) {
 						},
 					},
 				},
-				mn: &domain.MenuInput{
-					ID: 22,
-				},
+				menuID: 22,
 			},
 			want: []*models.Item{
 				&models.Item{
@@ -71,19 +67,33 @@ func TestService_AddItems(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "GetMenuFailed",
+			name: "CheckMenuExistFailed",
 			fields: fields{
 				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return nil, errors.New("Find Error")
+					CheckMenuExistFunc: func(menuID int) (bool, error) {
+						return false, errors.New("Find Error")
 					},
 				},
 				item.ServiceMock{},
 			},
 			args: args{
-				mn: &domain.MenuInput{
-					ID: 22,
+				menuID: 22,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "MenuNotExist",
+			fields: fields{
+				menu.ServiceMock{
+					CheckMenuExistFunc: func(menuID int) (bool, error) {
+						return false, nil
+					},
 				},
+				item.ServiceMock{},
+			},
+			args: args{
+				menuID: 22,
 			},
 			want:    nil,
 			wantErr: true,
@@ -92,10 +102,8 @@ func TestService_AddItems(t *testing.T) {
 			name: "CheckItemExistFailed",
 			fields: fields{
 				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID: 22,
-						}, nil
+					CheckMenuExistFunc: func(menuID int) (bool, error) {
+						return true, nil
 					},
 				},
 				item.ServiceMock{
@@ -112,9 +120,7 @@ func TestService_AddItems(t *testing.T) {
 						},
 					},
 				},
-				mn: &domain.MenuInput{
-					ID: 22,
-				},
+				menuID: 22,
 			},
 			want:    nil,
 			wantErr: true,
@@ -123,10 +129,8 @@ func TestService_AddItems(t *testing.T) {
 			name: "ItemExists",
 			fields: fields{
 				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID: 22,
-						}, nil
+					CheckMenuExistFunc: func(menuID int) (bool, error) {
+						return true, nil
 					},
 				},
 				item.ServiceMock{
@@ -143,9 +147,7 @@ func TestService_AddItems(t *testing.T) {
 						},
 					},
 				},
-				mn: &domain.MenuInput{
-					ID: 22,
-				},
+				menuID: 22,
 			},
 			want:    nil,
 			wantErr: false,
@@ -154,10 +156,8 @@ func TestService_AddItems(t *testing.T) {
 			name: "AddItemFailed",
 			fields: fields{
 				menu.ServiceMock{
-					FindByIDFunc: func(*domain.MenuInput) (*models.Menu, error) {
-						return &models.Menu{
-							ID: 22,
-						}, nil
+					CheckMenuExistFunc: func(menuID int) (bool, error) {
+						return true, nil
 					},
 				},
 				item.ServiceMock{
@@ -177,9 +177,7 @@ func TestService_AddItems(t *testing.T) {
 						},
 					},
 				},
-				mn: &domain.MenuInput{
-					ID: 22,
-				},
+				menuID: 22,
 			},
 			want:    nil,
 			wantErr: true,
@@ -194,7 +192,7 @@ func TestService_AddItems(t *testing.T) {
 					Item: &tt.fields.Item,
 				},
 			}
-			got, err := s.AddItems(tt.args.items, tt.args.mn)
+			got, err := s.AddItems(tt.args.items, tt.args.menuID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Service.AddItems() error = %v, wantErr %v", err, tt.wantErr)
 				return

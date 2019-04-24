@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"errors"
 
-	"git.d.foundation/datcom/backend/models"
-	"git.d.foundation/datcom/backend/src/domain"
-
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
+
+	"git.d.foundation/datcom/backend/models"
+	"git.d.foundation/datcom/backend/src/domain"
 )
 
 type userService struct {

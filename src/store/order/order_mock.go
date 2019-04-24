@@ -4,17 +4,19 @@
 package order
 
 import (
-	"sync"
-
 	"git.d.foundation/datcom/backend/models"
 	"git.d.foundation/datcom/backend/src/domain"
+	"sync"
 )
 
 var (
-	lockServiceMockAdd    sync.RWMutex
-	lockServiceMockDelete sync.RWMutex
-	lockServiceMockExist  sync.RWMutex
-	lockServiceMockGet    sync.RWMutex
+	lockServiceMockAdd                     sync.RWMutex
+	lockServiceMockCheckOrderExistByItemID sync.RWMutex
+	lockServiceMockDelete                  sync.RWMutex
+	lockServiceMockDeleteOrder             sync.RWMutex
+	lockServiceMockExist                   sync.RWMutex
+	lockServiceMockGet                     sync.RWMutex
+	lockServiceMockGetAllOrdersByItemID    sync.RWMutex
 )
 
 // Ensure, that ServiceMock does implement Service.
@@ -30,14 +32,23 @@ var _ Service = &ServiceMock{}
 //             AddFunc: func(o *domain.OrderInput) (*models.Order, error) {
 // 	               panic("mock out the Add method")
 //             },
+//             CheckOrderExistByItemIDFunc: func(ItemID int) (bool, error) {
+// 	               panic("mock out the CheckOrderExistByItemID method")
+//             },
 //             DeleteFunc: func(o *domain.OrderInput) error {
 // 	               panic("mock out the Delete method")
+//             },
+//             DeleteOrderFunc: func(o *models.Order) error {
+// 	               panic("mock out the DeleteOrder method")
 //             },
 //             ExistFunc: func(o *domain.OrderInput) (bool, error) {
 // 	               panic("mock out the Exist method")
 //             },
 //             GetFunc: func(userID int) ([]*domain.Item, error) {
 // 	               panic("mock out the Get method")
+//             },
+//             GetAllOrdersByItemIDFunc: func(ItemID int) ([]*models.Order, error) {
+// 	               panic("mock out the GetAllOrdersByItemID method")
 //             },
 //         }
 //
@@ -49,14 +60,23 @@ type ServiceMock struct {
 	// AddFunc mocks the Add method.
 	AddFunc func(o *domain.OrderInput) (*models.Order, error)
 
+	// CheckOrderExistByItemIDFunc mocks the CheckOrderExistByItemID method.
+	CheckOrderExistByItemIDFunc func(ItemID int) (bool, error)
+
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(o *domain.OrderInput) error
+
+	// DeleteOrderFunc mocks the DeleteOrder method.
+	DeleteOrderFunc func(o *models.Order) error
 
 	// ExistFunc mocks the Exist method.
 	ExistFunc func(o *domain.OrderInput) (bool, error)
 
 	// GetFunc mocks the Get method.
 	GetFunc func(userID int) ([]*domain.Item, error)
+
+	// GetAllOrdersByItemIDFunc mocks the GetAllOrdersByItemID method.
+	GetAllOrdersByItemIDFunc func(ItemID int) ([]*models.Order, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -65,10 +85,20 @@ type ServiceMock struct {
 			// O is the o argument value.
 			O *domain.OrderInput
 		}
+		// CheckOrderExistByItemID holds details about calls to the CheckOrderExistByItemID method.
+		CheckOrderExistByItemID []struct {
+			// ItemID is the ItemID argument value.
+			ItemID int
+		}
 		// Delete holds details about calls to the Delete method.
 		Delete []struct {
 			// O is the o argument value.
 			O *domain.OrderInput
+		}
+		// DeleteOrder holds details about calls to the DeleteOrder method.
+		DeleteOrder []struct {
+			// O is the o argument value.
+			O *models.Order
 		}
 		// Exist holds details about calls to the Exist method.
 		Exist []struct {
@@ -79,6 +109,11 @@ type ServiceMock struct {
 		Get []struct {
 			// UserID is the userID argument value.
 			UserID int
+		}
+		// GetAllOrdersByItemID holds details about calls to the GetAllOrdersByItemID method.
+		GetAllOrdersByItemID []struct {
+			// ItemID is the ItemID argument value.
+			ItemID int
 		}
 	}
 }
@@ -114,6 +149,37 @@ func (mock *ServiceMock) AddCalls() []struct {
 	return calls
 }
 
+// CheckOrderExistByItemID calls CheckOrderExistByItemIDFunc.
+func (mock *ServiceMock) CheckOrderExistByItemID(ItemID int) (bool, error) {
+	if mock.CheckOrderExistByItemIDFunc == nil {
+		panic("ServiceMock.CheckOrderExistByItemIDFunc: method is nil but Service.CheckOrderExistByItemID was just called")
+	}
+	callInfo := struct {
+		ItemID int
+	}{
+		ItemID: ItemID,
+	}
+	lockServiceMockCheckOrderExistByItemID.Lock()
+	mock.calls.CheckOrderExistByItemID = append(mock.calls.CheckOrderExistByItemID, callInfo)
+	lockServiceMockCheckOrderExistByItemID.Unlock()
+	return mock.CheckOrderExistByItemIDFunc(ItemID)
+}
+
+// CheckOrderExistByItemIDCalls gets all the calls that were made to CheckOrderExistByItemID.
+// Check the length with:
+//     len(mockedService.CheckOrderExistByItemIDCalls())
+func (mock *ServiceMock) CheckOrderExistByItemIDCalls() []struct {
+	ItemID int
+} {
+	var calls []struct {
+		ItemID int
+	}
+	lockServiceMockCheckOrderExistByItemID.RLock()
+	calls = mock.calls.CheckOrderExistByItemID
+	lockServiceMockCheckOrderExistByItemID.RUnlock()
+	return calls
+}
+
 // Delete calls DeleteFunc.
 func (mock *ServiceMock) Delete(o *domain.OrderInput) error {
 	if mock.DeleteFunc == nil {
@@ -142,6 +208,37 @@ func (mock *ServiceMock) DeleteCalls() []struct {
 	lockServiceMockDelete.RLock()
 	calls = mock.calls.Delete
 	lockServiceMockDelete.RUnlock()
+	return calls
+}
+
+// DeleteOrder calls DeleteOrderFunc.
+func (mock *ServiceMock) DeleteOrder(o *models.Order) error {
+	if mock.DeleteOrderFunc == nil {
+		panic("ServiceMock.DeleteOrderFunc: method is nil but Service.DeleteOrder was just called")
+	}
+	callInfo := struct {
+		O *models.Order
+	}{
+		O: o,
+	}
+	lockServiceMockDeleteOrder.Lock()
+	mock.calls.DeleteOrder = append(mock.calls.DeleteOrder, callInfo)
+	lockServiceMockDeleteOrder.Unlock()
+	return mock.DeleteOrderFunc(o)
+}
+
+// DeleteOrderCalls gets all the calls that were made to DeleteOrder.
+// Check the length with:
+//     len(mockedService.DeleteOrderCalls())
+func (mock *ServiceMock) DeleteOrderCalls() []struct {
+	O *models.Order
+} {
+	var calls []struct {
+		O *models.Order
+	}
+	lockServiceMockDeleteOrder.RLock()
+	calls = mock.calls.DeleteOrder
+	lockServiceMockDeleteOrder.RUnlock()
 	return calls
 }
 
@@ -204,5 +301,36 @@ func (mock *ServiceMock) GetCalls() []struct {
 	lockServiceMockGet.RLock()
 	calls = mock.calls.Get
 	lockServiceMockGet.RUnlock()
+	return calls
+}
+
+// GetAllOrdersByItemID calls GetAllOrdersByItemIDFunc.
+func (mock *ServiceMock) GetAllOrdersByItemID(ItemID int) ([]*models.Order, error) {
+	if mock.GetAllOrdersByItemIDFunc == nil {
+		panic("ServiceMock.GetAllOrdersByItemIDFunc: method is nil but Service.GetAllOrdersByItemID was just called")
+	}
+	callInfo := struct {
+		ItemID int
+	}{
+		ItemID: ItemID,
+	}
+	lockServiceMockGetAllOrdersByItemID.Lock()
+	mock.calls.GetAllOrdersByItemID = append(mock.calls.GetAllOrdersByItemID, callInfo)
+	lockServiceMockGetAllOrdersByItemID.Unlock()
+	return mock.GetAllOrdersByItemIDFunc(ItemID)
+}
+
+// GetAllOrdersByItemIDCalls gets all the calls that were made to GetAllOrdersByItemID.
+// Check the length with:
+//     len(mockedService.GetAllOrdersByItemIDCalls())
+func (mock *ServiceMock) GetAllOrdersByItemIDCalls() []struct {
+	ItemID int
+} {
+	var calls []struct {
+		ItemID int
+	}
+	lockServiceMockGetAllOrdersByItemID.RLock()
+	calls = mock.calls.GetAllOrdersByItemID
+	lockServiceMockGetAllOrdersByItemID.RUnlock()
 	return calls
 }

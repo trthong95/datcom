@@ -75,3 +75,23 @@ func (os *orderService) Get(userID int) ([]*domain.Item, error) {
 
 	return returnItems, err
 }
+
+// DeleteOrder ..
+func (s *orderService) DeleteOrder(o *models.Order) error {
+	_, err := o.Delete(context.Background(), s.db)
+	return err
+}
+
+// CheckOrderExistByItemID ..
+func (s *orderService) CheckOrderExistByItemID(ItemID int) (bool, error) {
+	return models.Orders(
+		qm.Where("item_id=?", ItemID),
+	).Exists(context.Background(), s.db)
+}
+
+// GetAllOrdersByItemID ..
+func (s *orderService) GetAllOrdersByItemID(ItemID int) ([]*models.Order, error) {
+	return models.Orders(
+		qm.Where("item_id=?", ItemID),
+	).All(context.Background(), s.db)
+}
